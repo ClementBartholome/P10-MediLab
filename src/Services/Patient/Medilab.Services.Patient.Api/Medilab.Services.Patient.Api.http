@@ -1,0 +1,6 @@
+@Medilab.Services.Patient.Api_HostAddress = http://localhost:5231
+
+GET {{Medilab.Services.Patient.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

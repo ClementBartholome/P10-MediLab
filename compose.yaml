@@ -1,0 +1,19 @@
+﻿services:
+  p10 - médilabo solutionsp10-mdilabosolutions:
+    image: p10 - médilabo solutionsp10-mdilabosolutions
+    build:
+      context: .
+      dockerfile: P10 - MédiLabo Solutions/Dockerfile
+
+  p10 - médilabo - patients apip10-mdilabo-patientsapi:
+    image: p10 - médilabo - patients apip10-mdilabo-patientsapi
+    build:
+      context: .
+      dockerfile: P10 - MédiLabo - Patients API/Dockerfile
+
+  p10 - médilabo - notes apip10-mdilabo-notesapi:
+    image: p10 - médilabo - notes apip10-mdilabo-notesapi
+    build:
+      context: .
+      dockerfile: P10 - MédiLabo - Notes API/Dockerfile
+
