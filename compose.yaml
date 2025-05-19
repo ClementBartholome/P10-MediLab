@@ -17,3 +17,21 @@
       context: .
       dockerfile: P10 - MédiLabo - Notes API/Dockerfile
 
+  webapplication1:
+    image: webapplication1
+    build:
+      context: .
+      dockerfile: WebApplication1/Dockerfile
+
+  gateway:
+    image: gateway
+    build:
+      context: .
+      dockerfile: Gateway/Dockerfile
+
+  authapi:
+    image: authapi
+    build:
+      context: .
+      dockerfile: AuthAPI/Dockerfile
+
