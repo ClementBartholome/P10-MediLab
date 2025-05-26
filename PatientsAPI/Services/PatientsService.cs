@@ -24,8 +24,16 @@ public class PatientsService(PatientsDbContext context)
 
     public async Task UpdatePatientAsync(Patient patient)
     {
-        context.Patients.Update(patient);
-        await context.SaveChangesAsync();
+        var existingPatient = await context.Patients.FindAsync(patient.Id);
+        if (existingPatient != null)
+        {
+            context.Entry(existingPatient).CurrentValues.SetValues(patient);
+            await context.SaveChangesAsync();
+        }
+        else
+        {
+            throw new InvalidOperationException("Patient introuvable pour la mise à jour.");
+        }
     }
 
     public async Task DeletePatientAsync(int id)

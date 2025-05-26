@@ -1,0 +1,46 @@
+@model P10___MédiLabo_Solutions.Models.PatientViewModel
+@using P10___MédiLabo___Patients_API.Enums
+@using P10___MédiLabo___Patients_API.Extensions
+
+@{
+    ViewData["Title"] = "Éditer un patient";
+}
+
+<section class="container mt-5">
+    <h2>Éditer les informations du patient</h2>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div class="mb-3">
+            <label asp-for="Prenom" class="form-label"></label>
+            <input asp-for="Prenom" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Nom" class="form-label"></label>
+            <input asp-for="Nom" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label asp-for="DateNaissance" class="form-label"></label>
+            <input asp-for="DateNaissance" class="form-control" type="date" required />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Genre" class="form-label"></label>
+            <select asp-for="Genre" class="form-select" required>
+                @foreach (var genre in Enum.GetValues(typeof(GenreEnum)).Cast<GenreEnum>())
+                {
+                    <option value="@((int)genre)">@genre.GetDisplayName()</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Adresse" class="form-label"></label>
+            <input asp-for="Adresse" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Telephone" class="form-label"></label>
+            <input asp-for="Telephone" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Annuler</a>
+    </form>
+</section>
+

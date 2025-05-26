@@ -54,8 +54,15 @@ public class PatientsController(PatientsService patientsService) : ControllerBas
             return NotFound();
         }
 
-        await patientsService.UpdatePatientAsync(patient);
-        return NoContent();
+        try
+        {
+            await patientsService.UpdatePatientAsync(patient);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erreur lors de la mise à jour : {ex.Message}");
+        }
     }
 
     [HttpDelete("{id}")]

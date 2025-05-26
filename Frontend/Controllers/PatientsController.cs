@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 public class PatientsController(IHttpClientFactory httpClientFactory) : Controller
 {
     private const string GatewayUrl = "https://localhost:7091";
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     public async Task<IActionResult> Index()
     {
@@ -31,6 +35,54 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         return View(new List<PatientViewModel>());
     }
 
+    public async Task<IActionResult> Edit(int id)
+    {
+        var token = Request.Cookies["AuthToken"];
+        if (string.IsNullOrEmpty(token))
+        {
+            TempData["ErrorMessage"] = "Vous devez être connecté pour éditer un patient.";
+            return RedirectToAction("Index");
+        }
+        var client = httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await client.GetAsync($"{GatewayUrl}/patients/{id}");
+        if (!response.IsSuccessStatusCode)
+        {
+            TempData["ErrorMessage"] = "Impossible de récupérer les informations du patient.";
+            return RedirectToAction("Index");
+        }
+        var content = await response.Content.ReadAsStringAsync();
+        var patient = JsonSerializer.Deserialize<PatientViewModel>(content, JsonOptions);
+        if (patient == null)
+        {
+            TempData["ErrorMessage"] = "Patient introuvable.";
+            return RedirectToAction("Index");
+        }
+        return View(patient);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(PatientViewModel patient)
+    {
+        var token = Request.Cookies["AuthToken"];
+        if (string.IsNullOrEmpty(token))
+        {
+            TempData["ErrorMessage"] = "Vous devez être connecté pour éditer un patient.";
+            return RedirectToAction("Index");
+        }
+        var client = httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var content = new StringContent(JsonSerializer.Serialize(patient), System.Text.Encoding.UTF8, "application/json");
+        var response = await client.PutAsync($"{GatewayUrl}/patients/{patient.Id}", content);
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["LoginMessage"] = "Patient modifié avec succès.";
+            return RedirectToAction("Index");
+        }
+        TempData["ErrorMessage"] = "Erreur lors de la modification du patient.";
+        return View(patient);
+    }
+
     private async Task<List<PatientViewModel>> GetPatients(string token)
     {
         var client = httpClientFactory.CreateClient();
@@ -40,8 +92,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         response.EnsureSuccessStatusCode();
         
         var content = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<List<PatientViewModel>>(
-            content, 
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<PatientViewModel>();
+        return JsonSerializer.Deserialize<List<PatientViewModel>>(content, JsonOptions) ?? [];
     }
 }
+
