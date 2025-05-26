@@ -1,17 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using P10___MédiLabo_Solutions.Models;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace P10___MédiLabo_Solutions.Controllers;
 
+[Area("Frontend")]
+[Route("[area]/[controller]")]
 public class AuthController(IHttpClientFactory httpClientFactory) : Controller
 {
     private const string GatewayUrl = "https://localhost:7091";
 
     [HttpPost]
+    [Route("login")]
     public async Task<IActionResult> Login(string username, string password)
     {
         try
@@ -59,6 +60,7 @@ public class AuthController(IHttpClientFactory httpClientFactory) : Controller
     }
 
     [HttpPost]
+    [Route("logout")]
     public IActionResult Logout()
     {
         Response.Cookies.Delete("AuthToken");

@@ -1,7 +1,7 @@
 ﻿<div class="card mb-4">
     <div class="card-body">
         <h5 class="card-title">Connexion</h5>
-        <form asp-controller="Auth" asp-action="Login" method="post">
+        <form asp-controller="Auth" asp-action="Login" method="post" asp-area="Frontend">
             <div class="mb-3">
                 <label for="username" class="form-label">Nom d'utilisateur</label>
                 <input type="text" class="form-control" id="username" name="username"
