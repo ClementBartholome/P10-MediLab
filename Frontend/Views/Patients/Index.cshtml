@@ -1,16 +1,13 @@
-﻿@using P10___MédiLabo___Patients_API.Enums
-@using P10___MédiLabo___Patients_API.Extensions
-@model List<PatientViewModel>
+﻿@model List<PatientViewModel>
 @{
-    ViewData["Title"] = "Liste des Patients";
+    ViewData["Title"] = "Mes patients";
 
     var token = Context.Request.Cookies["AuthToken"];
     var loginMessage = TempData["LoginMessage"] as string;
     var errorMessage = TempData["ErrorMessage"] as string;
 }
 
-<section class="container mt-5">
-
+<section class="container mt-4">
     @if (!string.IsNullOrEmpty(loginMessage))
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -33,47 +30,97 @@
         @await Html.PartialAsync("LoginForm")
     }
 
-    <!-- Tableau des patients -->
+    <!-- Dashboard des patients -->
     @if (!string.IsNullOrEmpty(token))
     {
-        <h1 class="text-left">Liste des Patients</h1>
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Prénom</th>
-                            <th>Nom</th>
-                            <th>Date de Naissance</th>
-                            <th>Genre</th>
-                            <th>Adresse</th>
-                            <th>Téléphone</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @if (Model != null)
-                        {
-                            foreach (var patient in Model)
-                            {
-                                <tr>
-                                    <td>@patient.Prenom</td>
-                                    <td>@patient.Nom</td>
-                                    <td>@patient.DateNaissance.ToString("dd/MM/yyyy")</td>
-                                    <td>@(((GenreEnum)patient.Genre).GetDisplayName())</td>
-                                    <td>@patient.Adresse</td>
-                                    <td>@patient.Telephone</td>
-                                    <td>
-                                        <a asp-action="Edit" asp-route-id="@patient.Id" class="btn btn-sm btn-primary">Éditer</a>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        </tbody>
-                    </table>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Mes patients</h1>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fa-solid fa-plus"></i> Nouveau patient
+            </a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            @if (Model.Any())
+            {
+                foreach (var patient in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-circle-user fa-4x text-primary"></i>
+                                </div>
+                                <h5 class="card-title">@patient.Prenom @patient.Nom</h5>
+                                <div class="mt-4 d-grid gap-2">
+                                    <a asp-action="Index" asp-controller="Notes" asp-route-patientId="@patient.Id"
+                                       class="btn btn-outline-primary">
+                                        <i class="fa-solid fa-info-circle"></i> Détails
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@patient.Id" class="btn btn-outline-secondary">
+                                        <i class="fa-solid fa-pen-to-square"></i> Éditer
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@patient.Id">
+                                        <i class="fa-solid fa-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal de confirmation de suppression -->
+                    <div class="modal fade" id="deleteModal-@patient.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@patient.Id" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title" id="deleteModalLabel-@patient.Id">
+                                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                        Confirmation de suppression
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Êtes-vous sûr de vouloir supprimer le patient <strong>@patient.Prenom @patient.Nom</strong> ?</p>
+                                    <p class="text-danger">
+                                        <i class="fa-solid fa-exclamation-circle me-1"></i>
+                                        Cette action est irréversible et supprimera également toutes les notes associées.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="fa-solid fa-times me-1"></i>
+                                        Annuler
+                                    </button>
+                                    <form asp-action="Delete" asp-route-id="@patient.Id" method="post">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fa-solid fa-trash-alt me-1"></i>
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="fa-solid fa-info-circle me-2"></i> Aucun patient dans la base de données.
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     }
 </section>
+
+<style>
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+    }
+    
+    .modal.show .modal-dialog {
+        transform: none;
+    }
+</style>
