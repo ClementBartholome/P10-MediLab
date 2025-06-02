@@ -29,19 +29,33 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync($"{GatewayUrl}/notes/patient/{patientId}");
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            var patientResponse = await client.GetAsync($"{GatewayUrl}/patients/{patientId}");
+            if (!patientResponse.IsSuccessStatusCode)
             {
-                return View(new List<NoteViewModel>());
+                TempData["ErrorMessage"] = "Patient introuvable.";
+                return RedirectToAction("Index", "Patients");
+            }
+            var patientContent = await patientResponse.Content.ReadAsStringAsync();
+            var patient = JsonSerializer.Deserialize<PatientViewModel>(patientContent, JsonOptions);
+
+            var notesResponse = await client.GetAsync($"{GatewayUrl}/notes/patient/{patientId}");
+            var notes = new List<NoteViewModel>();
+        
+            if (notesResponse.IsSuccessStatusCode)
+            {
+                var notesContent = await notesResponse.Content.ReadAsStringAsync();
+                notes = JsonSerializer.Deserialize<List<NoteViewModel>>(notesContent, JsonOptions) ?? new List<NoteViewModel>();
             }
 
-            var content = await response.Content.ReadAsStringAsync();
-            var notes = JsonSerializer.Deserialize<List<NoteViewModel>>(content, JsonOptions) ??
-                        new List<NoteViewModel>();
-
+            var viewModel = new DetailPatientViewModel
+            {
+                Patient = patient,
+                Notes = notes
+            };
+            
             ViewData["PatientId"] = patientId;
-            return View(notes);
+            
+            return View(viewModel);
         }
         catch
         {
@@ -84,7 +98,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(NoteViewModel note)
+    public async Task<IActionResult> Edit(NoteViewModel vm)
     {
         var token = Request.Cookies["AuthToken"];
         if (string.IsNullOrEmpty(token))
@@ -98,22 +112,22 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var content = new StringContent(JsonSerializer.Serialize(note), Encoding.UTF8, "application/json");
-            var response = await client.PutAsync($"{GatewayUrl}/notes/{note.Id}", content);
+            var content = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
+            var response = await client.PutAsync($"{GatewayUrl}/notes/{vm.Id}", content);
 
             if (!response.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Erreur lors de la mise à jour de la note.";
-                return View(note);
+                return View(vm);
             }
 
             TempData["SuccessMessage"] = "Note mise à jour avec succès.";
-            return RedirectToAction("Index", new { patientId = note.PatientId });
+            return RedirectToAction("Index", new { patientId = vm.PatientId });
         }
         catch
         {
             TempData["ErrorMessage"] = "Erreur lors de la mise à jour de la note.";
-            return View(note);
+            return View(vm);
         }
     }
 }

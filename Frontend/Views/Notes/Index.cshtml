@@ -1,50 +1,132 @@
-﻿@model List<NoteViewModel>
+﻿@using P10___MédiLabo___Patients_API.Enums
+@using P10___MédiLabo___Patients_API.Extensions
+@model DetailPatientViewModel
 
 <section class="container mt-5">
-
     <a asp-controller="Patients" asp-action="Index" class="btn btn-primary mb-3">
         <i class="fa-solid fa-arrow-left"></i>
         Retour à la liste des patients
     </a>
-    
-    <h1>
-        <i class="fa-solid fa-sticky-note"></i>
-        Notes du patient
-    </h1>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                @if (Model is { Count: > 0 })
-                {
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Note</th>
-                            <th>Date de création</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var note in Model)
-                        {
-                            <tr>
-                                <td>@note.Note</td>
-                                <td>@note.Date.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@note.Id" class="btn btn-sm btn-primary">
-                                        <i class="fa-solid fa-pen-to-square"></i> Éditer
-                                    </a>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <div class="text-center">Aucune note disponible pour ce patient.</div>
-                }
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+            <div class="card h-auto shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fa-solid fa-user me-2"></i>
+                        Détails du patient
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fa-solid fa-circle-user fa-6x text-primary mb-3"></i>
+                        <h3>@Model.Patient.Prenom @Model.Patient.Nom</h3>
+                    </div>
+                    
+                    <dl class="row">
+                        <dt class="col-sm-5"><i class="fa-solid fa-calendar-alt me-2"></i>Date de naissance</dt>
+                        <dd class="col-sm-7">@Model.Patient.DateNaissance.ToString("dd/MM/yyyy")</dd>
+                        
+                        <dt class="col-sm-5"><i class="fa-solid fa-venus-mars me-2"></i>Genre</dt>
+                        <dd class="col-sm-7">@(((GenreEnum)Model.Patient.Genre).GetDisplayName())</dd>
+                        
+                        <dt class="col-sm-5"><i class="fa-solid fa-map-marker-alt me-2"></i>Adresse</dt>
+                        <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.Patient.Adresse) ? "Non renseignée" : Model.Patient.Adresse)</dd>
+                        
+                        <dt class="col-sm-5"><i class="fa-solid fa-phone me-2"></i>Téléphone</dt>
+                        <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.Patient.Telephone) ? "Non renseigné" : Model.Patient.Telephone)</dd>
+                    </dl>
+                    
+                    <div class="text-center mt-3">
+                        <a asp-controller="Patients" asp-action="Edit" asp-route-id="@Model.Patient.Id" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-user-edit me-1"></i> Modifier le patient
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fa-solid fa-clipboard-list me-2"></i>
+                        Notes médicales
+                    </h4>
+                    <a asp-action="Create" asp-route-patientId="@Model.Patient.Id" class="btn btn-sm btn-light">
+                        <i class="fa-solid fa-plus me-1"></i> Ajouter une note
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Notes is { Count: > 0 })
+                    {
+                        <div class="timeline">
+                            @foreach (var note in Model.Notes.OrderByDescending(n => n.Date))
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-date">
+                                        <span class="badge bg-secondary">
+                                            <i class="fa-regular fa-calendar me-1"></i>
+                                            @note.Date.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <p class="card-text">@note.Note</p>
+                                                <div class="text-end">
+                                                    <a asp-action="Edit" asp-route-id="@note.Id" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fa-solid fa-pen-to-square me-1"></i> Éditer
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fa-solid fa-clipboard fa-3x mb-3 text-muted"></i>
+                            <p class="lead">Aucune note disponible pour ce patient.</p>
+                            <a asp-action="Create" asp-route-patientId="@Model.Patient.Id" class="btn btn-primary mt-2">
+                                <i class="fa-solid fa-plus me-1"></i> Créer la première note
+                            </a>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        border-left: 1px solid #dee2e6;
+        padding-left: 1.5rem;
+    }
+    
+    .timeline-date {
+        margin-bottom: 0.5rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -0.5rem;
+        top: 0;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background-color: #6c757d;
+    }
+</style>
