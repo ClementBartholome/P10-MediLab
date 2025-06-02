@@ -28,6 +28,11 @@ public class NotesController(NotesService notesService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(Notes note)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         await notesService.CreateAsync(note);
         return CreatedAtAction(nameof(Get), new { id = note.Id }, note);
     }

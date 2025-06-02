@@ -130,4 +130,86 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             return View(vm);
         }
     }
+
+    public IActionResult Create(int patientId)
+    {
+        var token = Request.Cookies["AuthToken"];
+        if (string.IsNullOrEmpty(token))
+        {
+            TempData["ErrorMessage"] = "Vous devez être connecté pour créer une note.";
+            return RedirectToAction("Index", "Patients");
+        }
+
+        var viewModel = new NoteViewModel { PatientId = patientId };
+        return View(viewModel);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Create(NoteViewModel vm)
+    {
+        var token = Request.Cookies["AuthToken"];
+        if (string.IsNullOrEmpty(token))
+        {
+            TempData["ErrorMessage"] = "Vous devez être connecté pour créer une note.";
+            return RedirectToAction("Index", "Patients");
+        }
+
+        try
+        {
+            vm.Date = DateTime.Now;
+            vm.Id = string.Empty;
+
+            var client = httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var content = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{GatewayUrl}/notes", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["ErrorMessage"] = "Erreur lors de l'enregistrement de la note.";
+                return RedirectToAction("Index", "Patients");
+            }
+
+            TempData["SuccessMessage"] = "Note créée avec succès.";
+            return RedirectToAction("Index", new { patientId = vm.PatientId });
+        }
+        catch
+        {
+            TempData["ErrorMessage"] = "Erreur lors de la création de la note.";
+            return View(vm);
+        }
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Delete(string id, int patientId)
+    {
+        var token = Request.Cookies["AuthToken"];
+        if (string.IsNullOrEmpty(token))
+        {
+            TempData["ErrorMessage"] = "Vous devez être connecté pour supprimer une note.";
+            return RedirectToAction("Index", "Patients");
+        }
+
+        try
+        {
+            var client = httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.DeleteAsync($"{GatewayUrl}/notes/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["ErrorMessage"] = "Erreur lors de la suppression de la note.";
+                return RedirectToAction("Index", new { patientId });
+            }
+
+            TempData["SuccessMessage"] = "Note supprimée avec succès.";
+            return RedirectToAction("Index", new { patientId });
+        }
+        catch
+        {
+            TempData["ErrorMessage"] = "Erreur lors de la suppression de la note.";
+            return RedirectToAction("Index", new { patientId });
+        }
+    }
 }
