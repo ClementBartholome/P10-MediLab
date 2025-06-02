@@ -1,0 +1,50 @@
+﻿@model List<NoteViewModel>
+
+<section class="container mt-5">
+
+    <a asp-controller="Patients" asp-action="Index" class="btn btn-primary mb-3">
+        <i class="fa-solid fa-arrow-left"></i>
+        Retour à la liste des patients
+    </a>
+    
+    <h1>
+        <i class="fa-solid fa-sticky-note"></i>
+        Notes du patient
+    </h1>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                @if (Model is { Count: > 0 })
+                {
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Note</th>
+                            <th>Date de création</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var note in Model)
+                        {
+                            <tr>
+                                <td>@note.Note</td>
+                                <td>@note.Date.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@note.Id" class="btn btn-sm btn-primary">
+                                        <i class="fa-solid fa-pen-to-square"></i> Éditer
+                                    </a>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center">Aucune note disponible pour ce patient.</div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

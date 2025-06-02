@@ -1,0 +1,29 @@
+@model NoteViewModel
+
+<section class="container mt-5">
+    <h1>Éditer la note</h1>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="PatientId" />
+
+        <div class="mb-3">
+            <label asp-for="Note" class="form-label">Note</label>
+            <textarea asp-for="Note" class="form-control" rows="5"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Date" class="form-label">Date</label>
+            <input asp-for="Date" class="form-control" type="datetime-local" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-save"></i>
+            Enregistrer
+        </button>
+        <a asp-action="Index" asp-route-patientId="@Model.PatientId" class="btn btn-secondary">
+            <i class="fa-solid fa-ban"></i>
+            Annuler
+        </a>
+    </form>
+</section>
