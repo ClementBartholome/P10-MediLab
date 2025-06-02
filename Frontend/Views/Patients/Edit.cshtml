@@ -1,46 +1,65 @@
-@model P10___MédiLabo_Solutions.Models.PatientViewModel
 @using P10___MédiLabo___Patients_API.Enums
 @using P10___MédiLabo___Patients_API.Extensions
-
+@model PatientViewModel
 @{
     ViewData["Title"] = "Éditer un patient";
 }
 
 <section class="container mt-5">
-    <h2>Éditer les informations du patient</h2>
-    <form asp-action="Edit" method="post">
-        <input type="hidden" asp-for="Id" />
-        <div class="mb-3">
-            <label asp-for="Prenom" class="form-label"></label>
-            <input asp-for="Prenom" class="form-control" required />
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="fa-solid fa-user-edit me-2"></i>
+                        Modifier le patient
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="mb-3">
+                            <label asp-for="Prenom" class="form-label">Prénom</label>
+                            <input asp-for="Prenom" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Nom" class="form-label">Nom</label>
+                            <input asp-for="Nom" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="DateNaissance" class="form-label">Date de naissance</label>
+                            <input asp-for="DateNaissance" class="form-control" type="date" required />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Genre" class="form-label">Genre</label>
+                            <select asp-for="Genre" class="form-select" required>
+                                @foreach (var genre in Enum.GetValues(typeof(GenreEnum)).Cast<GenreEnum>())
+                                {
+                                    <option value="@((int)genre)">@genre.GetDisplayName()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Adresse" class="form-label">Adresse</label>
+                            <input asp-for="Adresse" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Telephone" class="form-label">Téléphone</label>
+                            <input asp-for="Telephone" class="form-control" />
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-ban me-1"></i>
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-save me-1"></i>
+                                Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label asp-for="Nom" class="form-label"></label>
-            <input asp-for="Nom" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label asp-for="DateNaissance" class="form-label"></label>
-            <input asp-for="DateNaissance" class="form-control" type="date" required />
-        </div>
-        <div class="mb-3">
-            <label asp-for="Genre" class="form-label"></label>
-            <select asp-for="Genre" class="form-select" required>
-                @foreach (var genre in Enum.GetValues(typeof(GenreEnum)).Cast<GenreEnum>())
-                {
-                    <option value="@((int)genre)">@genre.GetDisplayName()</option>
-                }
-            </select>
-        </div>
-        <div class="mb-3">
-            <label asp-for="Adresse" class="form-label"></label>
-            <input asp-for="Adresse" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label asp-for="Telephone" class="form-label"></label>
-            <input asp-for="Telephone" class="form-control" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Enregistrer</button>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Annuler</a>
-    </form>
+    </div>
 </section>
-
