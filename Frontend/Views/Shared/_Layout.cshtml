@@ -12,12 +12,15 @@
 <body>
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container mt-3 d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="/">MédiLabo Solutions</a>
+        <div class="container d-flex justify-content-between align-items-center">
+            <img src="~/assets/logo-removebg-preview.png" alt="Logo MédiLabo Solutions" class="img-fluid" style="max-height: 75px;"/>
             @if (!string.IsNullOrEmpty(Context.Request.Cookies["AuthToken"]))
             {
                 <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-danger ms-auto">Se déconnecter</button>
+                    <button type="submit" class="btn btn-danger ms-auto">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Se déconnecter
+                    </button>
                 </form>
             }
         </div>
@@ -37,6 +40,7 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+<script src="https://kit.fontawesome.com/7c85ecb699.js" crossorigin="anonymous"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
