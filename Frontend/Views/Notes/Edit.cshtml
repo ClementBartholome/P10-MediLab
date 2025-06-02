@@ -17,13 +17,13 @@
             <input asp-for="Date" class="form-control" type="datetime-local" />
         </div>
 
-        <button type="submit" class="btn btn-primary">
-            <i class="fa-solid fa-save"></i>
-            Enregistrer
-        </button>
         <a asp-action="Index" asp-route-patientId="@Model.PatientId" class="btn btn-secondary">
             <i class="fa-solid fa-ban"></i>
             Annuler
         </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-save"></i>
+            Enregistrer
+        </button>
     </form>
 </section>
