@@ -22,30 +22,31 @@
                         <i class="fa-solid fa-circle-user fa-6x text-primary mb-3"></i>
                         <h3>@Model.Patient.Prenom @Model.Patient.Nom</h3>
                     </div>
-                    
+
                     <dl class="row">
-                        <dt class="col-sm-5"><i class="fa-solid fa-calendar-alt me-2"></i>Date de naissance</dt>
-                        <dd class="col-sm-7">@Model.Patient.DateNaissance.ToString("dd/MM/yyyy")</dd>
-                        
-                        <dt class="col-sm-5"><i class="fa-solid fa-venus-mars me-2"></i>Genre</dt>
-                        <dd class="col-sm-7">@(((GenreEnum)Model.Patient.Genre).GetDisplayName())</dd>
-                        
-                        <dt class="col-sm-5"><i class="fa-solid fa-map-marker-alt me-2"></i>Adresse</dt>
-                        <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.Patient.Adresse) ? "Non renseignée" : Model.Patient.Adresse)</dd>
-                        
-                        <dt class="col-sm-5"><i class="fa-solid fa-phone me-2"></i>Téléphone</dt>
-                        <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.Patient.Telephone) ? "Non renseigné" : Model.Patient.Telephone)</dd>
+                        <dt class="col-sm-7"><i class="fa-solid fa-calendar-alt me-2"></i>Date de naissance</dt>
+                        <dd class="col-sm-5">@Model.Patient.DateNaissance.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-7"><i class="fa-solid fa-venus-mars me-2"></i>Genre</dt>
+                        <dd class="col-sm-5">@(((GenreEnum)Model.Patient.Genre).GetDisplayName())</dd>
+
+                        <dt class="col-sm-7"><i class="fa-solid fa-map-marker-alt me-2"></i>Adresse</dt>
+                        <dd class="col-sm-5">@(string.IsNullOrEmpty(Model.Patient.Adresse) ? "Non renseignée" : Model.Patient.Adresse)</dd>
+
+                        <dt class="col-sm-7"><i class="fa-solid fa-phone me-2"></i>Téléphone</dt>
+                        <dd class="col-sm-5">@(string.IsNullOrEmpty(Model.Patient.Telephone) ? "Non renseigné" : Model.Patient.Telephone)</dd>
                     </dl>
-                    
+
                     <div class="text-center mt-3">
-                        <a asp-controller="Patients" asp-action="Edit" asp-route-id="@Model.Patient.Id" class="btn btn-outline-primary">
+                        <a asp-controller="Patients" asp-action="Edit" asp-route-id="@Model.Patient.Id"
+                           class="btn btn-outline-primary">
                             <i class="fa-solid fa-user-edit me-1"></i> Modifier le patient
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -75,14 +76,31 @@
                                             <div class="card-body">
                                                 <p class="card-text">@note.Note</p>
                                                 <div class="text-end">
-                                                    <a asp-action="Edit" asp-route-id="@note.Id" class="btn btn-sm btn-outline-primary">
+                                                    <a asp-action="Edit" asp-route-id="@note.Id"
+                                                       class="btn btn-sm btn-outline-primary">
                                                         <i class="fa-solid fa-pen-to-square me-1"></i> Éditer
                                                     </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@note.Id">
+                                                        <i class="fa-solid fa-trash me-1"></i> Supprimer
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                
+                                @await Html.PartialAsync("_DeleteConfirmationModal", new DeleteConfirmationViewModel
+                                {
+                                    ItemId = note.Id,
+                                    ItemName = $"du {note.Date:dd/MM/yyyy}",
+                                    ItemTypeDescription = "la note",
+                                    WarningMessage = "Cette action est irréversible.",
+                                    ControllerName = "Notes",
+                                    AdditionalParameters = new Dictionary<string, string>
+                                    {
+                                        { "patientId", Model.Patient.Id.ToString() }
+                                    }
+                                })
                             }
                         </div>
                     }
@@ -107,18 +125,18 @@
         position: relative;
         padding-left: 1.5rem;
     }
-    
+
     .timeline-item {
         position: relative;
         padding-bottom: 1.5rem;
         border-left: 1px solid #dee2e6;
         padding-left: 1.5rem;
     }
-    
+
     .timeline-date {
         margin-bottom: 0.5rem;
     }
-    
+
     .timeline-item::before {
         content: '';
         position: absolute;

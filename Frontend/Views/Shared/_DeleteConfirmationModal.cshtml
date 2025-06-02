@@ -1,0 +1,47 @@
+﻿@model DeleteConfirmationViewModel
+
+<div class="modal fade" id="deleteModal-@Model.ItemId" tabindex="-1" aria-labelledby="deleteModalLabel-@Model.ItemId" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel-@Model.ItemId">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    Confirmation de suppression
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer @Model.ItemTypeDescription <strong>@Model.ItemName</strong> ?</p>
+                <p class="text-danger">
+                    <i class="fa-solid fa-exclamation-circle me-1"></i>
+                    @Model.WarningMessage
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-times me-1"></i>
+                    Annuler
+                </button>
+                <form asp-controller="@Model.ControllerName" asp-action="Delete" asp-route-id="@Model.ItemId" method="post">
+                    @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+                    {
+                        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                    }
+                    
+                    @if (Model.AdditionalParameters != null)
+                    {
+                        foreach (var param in Model.AdditionalParameters)
+                        {
+                            <input type="hidden" name="@param.Key" value="@param.Value" />
+                        }
+                    }
+                    
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa-solid fa-trash-alt me-1"></i>
+                        Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

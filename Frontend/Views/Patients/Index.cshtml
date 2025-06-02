@@ -68,39 +68,14 @@
                         </div>
                     </div>
                     
-                    <!-- Modal de confirmation de suppression -->
-                    <div class="modal fade" id="deleteModal-@patient.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@patient.Id" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header bg-danger text-white">
-                                    <h5 class="modal-title" id="deleteModalLabel-@patient.Id">
-                                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                        Confirmation de suppression
-                                    </h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Êtes-vous sûr de vouloir supprimer le patient <strong>@patient.Prenom @patient.Nom</strong> ?</p>
-                                    <p class="text-danger">
-                                        <i class="fa-solid fa-exclamation-circle me-1"></i>
-                                        Cette action est irréversible et supprimera également toutes les notes associées.
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        <i class="fa-solid fa-times me-1"></i>
-                                        Annuler
-                                    </button>
-                                    <form asp-action="Delete" asp-route-id="@patient.Id" method="post">
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="fa-solid fa-trash-alt me-1"></i>
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @await Html.PartialAsync("_DeleteConfirmationModal", new DeleteConfirmationViewModel
+                    {
+                        ItemId = patient.Id.ToString(),
+                        ItemName = $"{patient.Prenom} {patient.Nom}",
+                        ItemTypeDescription = "le patient",
+                        WarningMessage = "Cette action est irréversible et supprimera également toutes les notes associées.",
+                        ControllerName = "Patients"
+                    })
                 }
             }
             else
