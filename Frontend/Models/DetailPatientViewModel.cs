@@ -6,4 +6,5 @@ public class DetailPatientViewModel
 {
     public PatientViewModel Patient { get; set; }
     public List<NoteViewModel> Notes { get; set; }
+    public RiskAssessmentViewModel? RiskAssessment { get; set; }
 }

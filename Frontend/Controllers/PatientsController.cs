@@ -53,12 +53,9 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         }
         var content = await response.Content.ReadAsStringAsync();
         var patient = JsonSerializer.Deserialize<PatientViewModel>(content, JsonOptions);
-        if (patient == null)
-        {
-            TempData["ErrorMessage"] = "Patient introuvable.";
-            return RedirectToAction("Index");
-        }
-        return View(patient);
+        if (patient != null) return View(patient);
+        TempData["ErrorMessage"] = "Patient introuvable.";
+        return RedirectToAction("Index");
     }
 
     [HttpPost]
@@ -98,13 +95,11 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
     public IActionResult Create()
     {
         var token = Request.Cookies["AuthToken"];
-        if (string.IsNullOrEmpty(token))
-        {
-            TempData["ErrorMessage"] = "Vous devez être connecté pour créer un patient.";
-            return RedirectToAction("Index");
-        }
-    
-        return View(new PatientViewModel { DateNaissance = DateTime.Today.AddYears(-30) });
+        if (!string.IsNullOrEmpty(token))
+            return View(new PatientViewModel { DateNaissance = DateTime.Today.AddYears(-30) });
+        TempData["ErrorMessage"] = "Vous devez être connecté pour créer un patient.";
+        return RedirectToAction("Index");
+
     }
 
     [HttpPost]

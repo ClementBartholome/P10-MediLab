@@ -53,6 +53,24 @@
         "Delete"
       ],
       "SwaggerKey": "patients"
+    },
+    {
+      "DownstreamPathTemplate": "/api/assessment/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7081
+        }
+      ],
+      "UpstreamPathTemplate": "/assessment/{everything}",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
+      ],
+      "SwaggerKey": "risk"
     }
   ],
   "SwaggerEndPoints": [
@@ -73,6 +91,16 @@
           "Name": "Notes API",
           "Version": "v1",
           "Url": "https://localhost:7292/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "risk",
+      "Config": [
+        {
+          "Name": "Risk Assessment API",
+          "Version": "v1",
+          "Url": "https://localhost:7200/swagger/v1/swagger.json"
         }
       ]
     }

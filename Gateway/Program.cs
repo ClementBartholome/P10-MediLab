@@ -12,7 +12,7 @@ builder.Services.AddSwaggerForOcelot(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocal", policy =>
+    options.AddPolicy("AllowLocalFrontend", policy =>
     {
         policy.WithOrigins("http://localhost:7261")
             .AllowAnyHeader()

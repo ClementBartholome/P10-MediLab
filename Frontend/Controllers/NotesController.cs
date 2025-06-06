@@ -3,6 +3,7 @@ using P10___MédiLabo_Solutions.Models;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using DiabeteRiskAPI.Models;
 
 namespace P10___MédiLabo_Solutions.Controllers;
 
@@ -16,53 +17,78 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
     };
 
     public async Task<IActionResult> Index(int patientId)
+{
+    var token = Request.Cookies["AuthToken"];
+    if (string.IsNullOrEmpty(token))
     {
-        var token = Request.Cookies["AuthToken"];
-        if (string.IsNullOrEmpty(token))
-        {
-            TempData["ErrorMessage"] = "Vous devez être connecté pour voir les notes.";
-            return RedirectToAction("Index", "Patients");
-        }
-
-        try
-        {
-            var client = httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            var patientResponse = await client.GetAsync($"{GatewayUrl}/patients/{patientId}");
-            if (!patientResponse.IsSuccessStatusCode)
-            {
-                TempData["ErrorMessage"] = "Patient introuvable.";
-                return RedirectToAction("Index", "Patients");
-            }
-            var patientContent = await patientResponse.Content.ReadAsStringAsync();
-            var patient = JsonSerializer.Deserialize<PatientViewModel>(patientContent, JsonOptions);
-
-            var notesResponse = await client.GetAsync($"{GatewayUrl}/notes/patient/{patientId}");
-            var notes = new List<NoteViewModel>();
-        
-            if (notesResponse.IsSuccessStatusCode)
-            {
-                var notesContent = await notesResponse.Content.ReadAsStringAsync();
-                notes = JsonSerializer.Deserialize<List<NoteViewModel>>(notesContent, JsonOptions) ?? new List<NoteViewModel>();
-            }
-
-            var viewModel = new DetailPatientViewModel
-            {
-                Patient = patient,
-                Notes = notes
-            };
-            
-            ViewData["PatientId"] = patientId;
-            
-            return View(viewModel);
-        }
-        catch
-        {
-            TempData["ErrorMessage"] = "Erreur lors de la récupération des notes.";
-            return RedirectToAction("Index", "Patients");
-        }
+        TempData["ErrorMessage"] = "Vous devez être connecté pour voir les notes.";
+        return RedirectToAction("Index", "Patients");
     }
+
+    try
+    {
+        var client = httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        // 1. Récupérer les informations du patient
+        var patientResponse = await client.GetAsync($"{GatewayUrl}/patients/{patientId}");
+        if (!patientResponse.IsSuccessStatusCode)
+        {
+            TempData["ErrorMessage"] = "Patient introuvable.";
+            return RedirectToAction("Index", "Patients");
+        }
+        var patientContent = await patientResponse.Content.ReadAsStringAsync();
+        var patient = JsonSerializer.Deserialize<PatientViewModel>(patientContent, JsonOptions);
+
+        // 2. Récupérer les notes du patient
+        var notesResponse = await client.GetAsync($"{GatewayUrl}/notes/patient/{patientId}");
+        var notes = new List<NoteViewModel>();
+    
+        if (notesResponse.IsSuccessStatusCode)
+        {
+            var notesContent = await notesResponse.Content.ReadAsStringAsync();
+            notes = JsonSerializer.Deserialize<List<NoteViewModel>>(notesContent, JsonOptions) ?? [];
+        }
+
+        // 3. Récupérer l'évaluation du risque de diabète
+        var riskResponse = await client.GetAsync($"{GatewayUrl}/assessment/patient/{patientId}");
+        RiskAssessmentViewModel? riskAssessment = null;
+        
+        if (riskResponse.IsSuccessStatusCode)
+        {
+            var riskContent = await riskResponse.Content.ReadAsStringAsync();
+            
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new RiskLevelConverter() }
+            };
+    
+            riskAssessment = JsonSerializer.Deserialize<RiskAssessmentViewModel>(riskContent, options);
+        }
+        else
+        {
+            Console.WriteLine($"Erreur lors de la récupération de l'évaluation du risque: {riskResponse.StatusCode}");
+        }
+
+        var viewModel = new DetailPatientViewModel
+        {
+            Patient = patient,
+            Notes = notes,
+            RiskAssessment = riskAssessment
+        };
+        
+        ViewData["PatientId"] = patientId;
+        
+        return View(viewModel);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Exception lors de la récupération des données: {ex.Message}");
+        TempData["ErrorMessage"] = "Erreur lors de la récupération des informations du patient.";
+        return RedirectToAction("Index", "Patients");
+    }
+}
 
     public async Task<IActionResult> Edit(string id)
     {

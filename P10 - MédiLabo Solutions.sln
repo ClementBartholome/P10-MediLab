@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotesAPI", "NotesAPI\NotesA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "Gateway\Gateway.csproj", "{2A07AE59-9C3A-4C2A-A179-D6A2CB7E8230}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiabeteRiskAPI", "DiabeteRiskAPI\DiabeteRiskAPI.csproj", "{4F7663B2-A853-42F9-9BE6-2377F2858025}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{2A07AE59-9C3A-4C2A-A179-D6A2CB7E8230}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A07AE59-9C3A-4C2A-A179-D6A2CB7E8230}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A07AE59-9C3A-4C2A-A179-D6A2CB7E8230}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F7663B2-A853-42F9-9BE6-2377F2858025}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F7663B2-A853-42F9-9BE6-2377F2858025}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F7663B2-A853-42F9-9BE6-2377F2858025}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F7663B2-A853-42F9-9BE6-2377F2858025}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
