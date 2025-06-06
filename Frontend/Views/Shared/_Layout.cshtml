@@ -19,7 +19,7 @@
             @if (!string.IsNullOrEmpty(Context.Request.Cookies["AuthToken"]))
             {
                 <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-danger ms-auto">
+                    <button type="submit" class="btn btn-light ms-auto">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         Se déconnecter
                     </button>
