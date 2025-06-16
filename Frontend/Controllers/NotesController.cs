@@ -190,14 +190,28 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
 
             var content = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
             var response = await client.PostAsync($"{GatewayUrl}/notes", content);
-
+            
             if (!response.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Erreur lors de l'enregistrement de la note.";
                 return RedirectToAction("Index", "Patients");
             }
+            
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var createdNote = JsonSerializer.Deserialize<NoteViewModel>(responseContent, JsonOptions);
+            vm.Id = createdNote?.Id ?? string.Empty;
+            
+            var createdNoteContent = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
+
+            // Indexation dans ElasticSearch
+            var esResponse = await client.PostAsync($"{GatewayUrl}/assessment/notes", createdNoteContent);
+            if (!esResponse.IsSuccessStatusCode)
+            {
+                TempData["ErrorMessage"] = "Note créée mais non indexée dans ElasticSearch.";
+            }
 
             TempData["SuccessMessage"] = "Note créée avec succès.";
+            
             return RedirectToAction("Index", new { patientId = vm.PatientId });
         }
         catch

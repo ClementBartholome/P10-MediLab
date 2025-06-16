@@ -10,7 +10,6 @@ public class DiabetesAssessmentService(
 {
     public async Task<RiskAssessmentResult?> AssessPatientRiskByIdAsync(int patientId)
     {
-        // Étape 1: Récupérer les informations du patient
         var patient = await patientDataService.GetPatientAsync(patientId);
         if (patient == null)
         {
@@ -18,17 +17,11 @@ public class DiabetesAssessmentService(
             return null;
         }
 
-        // Étape 2: Récupérer les notes du patient et les indexer si nécessaire
         var notes = await patientDataService.GetPatientNotesAsync(patientId);
         logger.LogInformation("Récupération de {NoteCount} notes pour le patient {PatientId}", notes.Count, patientId);
         
-        // Étape 3: Indexer les notes dans ElasticSearch
-        await IndexPatientNotesAsync(notes);
-        
-        // Étape 4: Évaluer le risque de diabète
         var result = await diabetesRiskService.AssessPatientRiskAsync(patient);
         
-        // Ajouter des informations supplémentaires au résultat
         result.PatientName = $"{patient.Prenom} {patient.Nom}";
         result.DateOfBirth = patient.DateNaissance;
         result.NoteCount = notes.Count;

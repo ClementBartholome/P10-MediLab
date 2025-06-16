@@ -10,6 +10,7 @@ namespace DiabeteRiskAPI.Controllers;
 [Route("api/assessment")]
 public class DiabetesAssessmentController(
     DiabetesAssessmentService assessmentService,
+    ElasticSearchService elasticSearchService,
     ILogger<DiabetesAssessmentController> logger)
     : ControllerBase
 {
@@ -29,6 +30,21 @@ public class DiabetesAssessmentController(
         {
             logger.LogError(ex, "Erreur lors de l'évaluation du risque pour le patient {PatientId}", patientId);
             return StatusCode(500, "Erreur lors de l'évaluation du risque");
+        }
+    }
+    
+    [HttpPost("notes")]
+    public async Task<IActionResult> IndexNote([FromBody] NoteDocument note)
+    {
+        try
+        {
+            await elasticSearchService.IndexNoteAsync(note);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Erreur lors de l'indexation de la note");
+            return StatusCode(500, "Erreur lors de l'indexation de la note");
         }
     }
 }
