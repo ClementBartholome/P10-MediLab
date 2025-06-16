@@ -146,6 +146,15 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
                 TempData["ErrorMessage"] = "Erreur lors de la mise à jour de la note.";
                 return View(vm);
             }
+            
+            // Ré-indexation dans ElasticSearch
+            var esContent = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
+            var esResponse = await client.PostAsync($"{GatewayUrl}/assessment/notes", esContent);
+            if (!esResponse.IsSuccessStatusCode)
+            {
+                TempData["ErrorMessage"] = "Note mise à jour mais non indexée dans ElasticSearch.";
+                return RedirectToAction("Index", new { patientId = vm.PatientId });
+            }
 
             TempData["SuccessMessage"] = "Note mise à jour avec succès.";
             return RedirectToAction("Index", new { patientId = vm.PatientId });
@@ -208,10 +217,11 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             if (!esResponse.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Note créée mais non indexée dans ElasticSearch.";
+                return RedirectToAction("Index", new { patientId = vm.PatientId });
+
             }
 
             TempData["SuccessMessage"] = "Note créée avec succès.";
-            
             return RedirectToAction("Index", new { patientId = vm.PatientId });
         }
         catch
@@ -240,6 +250,14 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             if (!response.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Erreur lors de la suppression de la note.";
+                return RedirectToAction("Index", new { patientId });
+            }
+            
+            // Suppression de la note dans ElasticSearch
+            var esResponse = await client.DeleteAsync($"{GatewayUrl}/assessment/notes/{id}");
+            if (!esResponse.IsSuccessStatusCode)
+            {
+                TempData["ErrorMessage"] = "Note supprimée mais non retirée d'ElasticSearch.";
                 return RedirectToAction("Index", new { patientId });
             }
 
