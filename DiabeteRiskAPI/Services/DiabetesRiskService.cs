@@ -44,7 +44,7 @@ public class DiabetesRiskService(ElasticSearchService elasticSearchService)
         };
     }
 
-    private DiabetesRiskLevel CalculateRiskLevel(int age, bool isMale, int triggerCount)
+    private static DiabetesRiskLevel CalculateRiskLevel(int age, bool isMale, int triggerCount)
     {
         // Si aucun terme déclencheur, pas de risque
         if (triggerCount == 0)
@@ -92,7 +92,7 @@ public class DiabetesRiskService(ElasticSearchService elasticSearchService)
         return DiabetesRiskLevel.None;
     }
 
-    private int CalculateAge(DateTime birthDate)
+    private static int CalculateAge(DateTime birthDate)
     {
         var today = DateTime.Today;
         var age = today.Year - birthDate.Year;
