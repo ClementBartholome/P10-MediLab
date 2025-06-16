@@ -3,27 +3,9 @@
     ViewData["Title"] = "Mes patients";
 
     var token = Context.Request.Cookies["AuthToken"];
-    var loginMessage = TempData["LoginMessage"] as string;
-    var errorMessage = TempData["ErrorMessage"] as string;
 }
 
 <section class="container mt-4">
-    @if (!string.IsNullOrEmpty(loginMessage))
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @loginMessage
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @errorMessage
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
     <!-- Formulaire de connexion -->
     @if (string.IsNullOrEmpty(token))
     {

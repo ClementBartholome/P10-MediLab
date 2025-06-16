@@ -24,7 +24,7 @@
             </a>
             @if (!string.IsNullOrEmpty(Context.Request.Cookies["AuthToken"]))
             {
-                <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline" asp-area="Frontend">
                     <button type="submit" class="btn btn-light ms-auto">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         Se déconnecter
@@ -36,6 +36,7 @@
 </header>
 <div class="container">
     <main role="main" class="pb-3">
+        @await Html.PartialAsync("_AlertMessages")
         @RenderBody()
     </main>
 </div>

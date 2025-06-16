@@ -155,7 +155,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         
             if (response.IsSuccessStatusCode)
             {
-                TempData["LoginMessage"] = "Patient supprimé avec succès.";
+                TempData["SuccessMessage"] = "Patient supprimé avec succès.";
                 return RedirectToAction("Index");
             }
         
