@@ -1,6 +1,5 @@
 ﻿using DiabeteRiskAPI.Models;
 using Elastic.Clients.Elasticsearch;
-using Elastic.Clients.Elasticsearch.QueryDsl;
 
 namespace DiabeteRiskAPI.Services;
 
@@ -28,7 +27,7 @@ public class ElasticSearchService
                 )
             )
         );
-        
+
         if (!createIndexResponse.IsValidResponse)
         {
             throw new Exception($"Impossible de créer l'index : {createIndexResponse.DebugInformation}");
@@ -47,7 +46,7 @@ public class ElasticSearchService
         return response.IsValidResponse;
     }
 
-    public async Task<List<NoteDocument>> GetPatientNotesAsync(string patientId)
+    private async Task<List<NoteDocument>> GetPatientNotesAsync(string patientId)
     {
         var response = await _client.SearchAsync<NoteDocument>(s => s
             .Indices(NotesIndex)
@@ -63,36 +62,123 @@ public class ElasticSearchService
 
         return response.IsValidResponse ? response.Documents.ToList() : new List<NoteDocument>();
     }
-
+    
     public async Task<Dictionary<string, int>> CountTriggerTermsInPatientNotesAsync(string patientId, List<string> triggerTerms)
     {
         var results = new Dictionary<string, int>();
-
+    
         foreach (var term in triggerTerms)
         {
             var response = await _client.SearchAsync<NoteDocument>(s => s
-                .Indices(NotesIndex)
-                .Query(q => q
-                    .Bool(b => b
-                        .Must(
-                            q => q.Term(t => t
-                                .Field(f => f.PatientId)
-                                .Value(patientId)
-                            ),
-                            q => q.Fuzzy(m => m
+                    .Indices(NotesIndex)
+                    .Query(q => q
+                        .Bool(b => b
+                            .Must(
+                                queryDescriptor => queryDescriptor.Term(t => t
+                                    .Field(f => f.PatientId)
+                                    .Value(patientId)
+                                )
+                            )
+                            // Un match exact est plus pertinent (boost 3) qu'un match fuzzy (boost 1)
+                            .Should(
+                                // Recherche exacte 
+                                queryDescriptor => queryDescriptor.Match(m => m
+                                    .Field(f => f.Note)
+                                    .Query(term)
+                                    .Boost(3)
+                                ),
+                                // Recherche fuzzy
+                                queryDescriptor => queryDescriptor.Fuzzy(m => m
                                     .Field(f => f.Note)
                                     .Value(term)
-                                    .Fuzziness(new Fuzziness("AUTO")) 
+                                    .PrefixLength(2) 
+                                    .Fuzziness(new Fuzziness(2))
+                                    .Boost(1)
+                                ),
+                                // Recherche wildcard pour les variations
+                                queryDescriptor => queryDescriptor.Wildcard(w => w
+                                    .Field(f => f.Note)
+                                    .Value($"*{term.Replace(" ", "*")}*")
+                                    // Ignore la casse
+                                    .CaseInsensitive()
+                                )
                             )
+                            .MinimumShouldMatch(1)
                         )
                     )
-                )
-                .Size(100)
+                    .Size(0) // On ne veut que le count
             );
+        
+            results[term] = response.IsValidResponse ? (int)response.Total : 0;
+        }
+    
+        return results;
+    }
 
-            results[term] = response.IsValidResponse ? response.Documents.Count : 0;
+    public async Task<Dictionary<string, int>> FindMatchedTermsInPatientNotesAsync(string patientId,
+        List<string> triggerTerms)
+    {
+        var results = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var notes = await GetPatientNotesAsync(patientId);
+
+        foreach (var note in notes)
+        {
+            var words = note.Note
+                .Split(new[] { ' ', ',', '.', ';', ':', '!', '?', '\n', '\r', '\t', '’', '\'', '\"' },
+                    StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var word in words)
+            {
+                foreach (var trigger in triggerTerms)
+                {
+                    if (IsFuzzyMatch(word, trigger))
+                    {
+                        if (results.ContainsKey(word))
+                            results[word]++;
+                        else
+                            results[word] = 1;
+                    }
+                }
+            }
         }
 
         return results;
+    }
+
+    // Fuzzy match avec distance de Levenshtein <= 2
+    private static bool IsFuzzyMatch(string word, string trigger)
+    {
+        return LevenshteinDistance(word.ToLowerInvariant(), trigger.ToLowerInvariant()) <= 2;
+    }
+
+    private static int LevenshteinDistance(string s, string t)
+    {
+        var n = s.Length;
+        var m = t.Length;
+        var d = new int[n + 1, m + 1];
+
+        if (n == 0) return m;
+        if (m == 0) return n;
+
+        for (var i = 0; i <= n; d[i, 0] = i++)
+        {
+        }
+
+        for (var j = 0; j <= m; d[0, j] = j++)
+        {
+        }
+
+        for (var i = 1; i <= n; i++)
+        {
+            for (var j = 1; j <= m; j++)
+            {
+                var cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+                d[i, j] = Math.Min(
+                    Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                    d[i - 1, j - 1] + cost);
+            }
+        }
+
+        return d[n, m];
     }
 }

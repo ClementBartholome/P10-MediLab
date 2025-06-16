@@ -15,7 +15,7 @@ public class DiabetesRiskService(ElasticSearchService elasticSearchService)
 {
     private readonly List<string> _triggerTerms =
     [
-        "hémoglobine a1c", "microalbumine", "taille", "poids", "fumeur", "fumeuse",
+        "hémoglobine a1c", "microalbumine", "taille", "poids", "fumeur",
         "anormal", "cholestérol", "vertiges", "rechute", "réaction", "anticorps"
     ];
 
