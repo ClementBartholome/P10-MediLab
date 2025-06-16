@@ -1,5 +1,6 @@
 ﻿using DiabeteRiskAPI.Models;
 using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 
 namespace DiabeteRiskAPI.Services;
 
@@ -63,6 +64,12 @@ public class ElasticSearchService
         return response.IsValidResponse ? response.Documents.ToList() : new List<NoteDocument>();
     }
     
+    /// <summary>
+    /// Compte les occurrences de termes déclencheurs dans les notes d'un patient 
+    /// <param name="patientId"></param>
+    /// <param name="triggerTerms">Liste des termes à rechercher (ex: "fumeur", "anormal", etc.)</param>
+    /// <returns>Dictionnaire avec le nombre de notes contenant chaque terme</returns>
+    /// </summary>
     public async Task<Dictionary<string, int>> CountTriggerTermsInPatientNotesAsync(string patientId, List<string> triggerTerms)
     {
         var results = new Dictionary<string, int>();
@@ -70,43 +77,26 @@ public class ElasticSearchService
         foreach (var term in triggerTerms)
         {
             var response = await _client.SearchAsync<NoteDocument>(s => s
-                    .Indices(NotesIndex)
-                    .Query(q => q
-                        .Bool(b => b
-                            .Must(
-                                queryDescriptor => queryDescriptor.Term(t => t
-                                    .Field(f => f.PatientId)
-                                    .Value(patientId)
-                                )
+                .Indices(NotesIndex)
+                .Query(q => q
+                    .Bool(b => b
+                        .Must(
+                            queryDescriptor => queryDescriptor.Term(t => t
+                                .Field(f => f.PatientId)
+                                .Value(patientId)
+                            ),
+                            queryDescriptor => queryDescriptor.Match(m => m
+                                    .Field(noteDocument => noteDocument.Note) // Champ à rechercher
+                                    .Query(term) // Terme à rechercher
+                                    .Operator(Operator.And) // Tous les mots du terme recherché doivent être présents dans la note (e.g "hémoglobine a1c")
+                                    .Fuzziness(new Fuzziness(2)) // Tolérance aux fautes 
+                                    .PrefixLength(2) // Longueur de préfixe pour la correspondance floue
+                                    .MinimumShouldMatch("100%") // Tous les mots doivent correspondre
                             )
-                            // Un match exact est plus pertinent (boost 3) qu'un match fuzzy (boost 1)
-                            .Should(
-                                // Recherche exacte 
-                                queryDescriptor => queryDescriptor.Match(m => m
-                                    .Field(f => f.Note)
-                                    .Query(term)
-                                    .Boost(3)
-                                ),
-                                // Recherche fuzzy
-                                queryDescriptor => queryDescriptor.Fuzzy(m => m
-                                    .Field(f => f.Note)
-                                    .Value(term)
-                                    .PrefixLength(2) 
-                                    .Fuzziness(new Fuzziness(2))
-                                    .Boost(1)
-                                ),
-                                // Recherche wildcard pour les variations
-                                queryDescriptor => queryDescriptor.Wildcard(w => w
-                                    .Field(f => f.Note)
-                                    .Value($"*{term.Replace(" ", "*")}*")
-                                    // Ignore la casse
-                                    .CaseInsensitive()
-                                )
-                            )
-                            .MinimumShouldMatch(1)
                         )
                     )
-                    .Size(0) // On ne veut que le count
+                )
+                .Size(0)
             );
         
             results[term] = response.IsValidResponse ? (int)response.Total : 0;

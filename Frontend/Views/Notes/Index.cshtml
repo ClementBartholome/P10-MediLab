@@ -69,16 +69,19 @@
 
                     @if (Model.RiskAssessment.TriggerTermsFound.Any())
                     {
-                    <h6 class="fw-bold mb-2">Termes déclencheurs détectés :</h6>
-                    <div class="list-group list-group-flush">
-                        @foreach (var term in Model.RiskAssessment.TriggerTermsFound)
-                        {
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-start-0 border-end-0">
-                            <span>@term.Key</span>
-                            <span class="badge bg-primary rounded-pill">@term.Value</span>
+                        <h6 class="fw-bold mb-2">
+                            <span class="badge bg-primary rounded-pill">@Model.RiskAssessment.TriggerTermsFound.Count</span>
+                            @((Model.RiskAssessment.TriggerTermsFound.Count == 1) ? "terme déclencheur détecté" : "termes déclencheurs détectés")
+                        </h6>
+                        <div class="list-group list-group-flush">
+                            @foreach (var term in Model.RiskAssessment.TriggerTermsFound)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-start-0 border-end-0">
+                                    <span>@term.Key</span>
+                                    <small class="text-muted ms-2">dans @term.Value note@(term.Value > 1 ? "s" : "")</small>
+                                </div>
+                            }
                         </div>
-                        }
-                    </div>
                     }
                     else if (Model.RiskAssessment.NoteCount > 0)
                     {
@@ -240,7 +243,7 @@
     }
 
     .bg-success .risk-level::after { content: " ✓"; }
-    .bg-warning .risk-level::after { content: " ⚠️"; }
-    .bg-danger .risk-level::after { content: " ⚠️⚠️"; }
-    .bg-dark .risk-level::after { content: " ⚠️⚠️⚠️"; }
+    .bg-warning .risk-level::after { content: " 🟠"; }
+    .bg-danger .risk-level::after { content: " ⚠️"; }
+    .bg-dark .risk-level::after { content: " ⚠️⚠️"; }
 </style>
