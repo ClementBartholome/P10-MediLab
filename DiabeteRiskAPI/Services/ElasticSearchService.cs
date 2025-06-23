@@ -7,7 +7,7 @@ namespace DiabeteRiskAPI.Services;
 public class ElasticSearchService
 {
     private readonly ElasticsearchClient _client;
-    private const string NotesIndex = "medilabo";
+    private const string NotesIndex = "notes";
 
     public ElasticSearchService(ElasticsearchClient client)
     {
@@ -91,7 +91,7 @@ public class ElasticSearchService
                                     .Operator(Operator.And) // Tous les mots du terme recherché doivent être présents dans la note (e.g "hémoglobine a1c")
                                     .Fuzziness(new Fuzziness(2)) // Tolérance aux fautes 
                                     .PrefixLength(2) // Longueur de préfixe pour la correspondance floue
-                                    .MinimumShouldMatch("100%") // Tous les mots doivent correspondre
+                                    // .MinimumShouldMatch("100%") // Tous les mots doivent correspondre
                             )
                         )
                     )

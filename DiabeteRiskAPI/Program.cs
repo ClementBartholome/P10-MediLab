@@ -57,16 +57,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // Configurer Elasticsearch avec le client officiel recommandé
-builder.Services.AddSingleton<ElasticsearchClient>(sp =>
+builder.Services.AddSingleton<ElasticsearchClient>(provider =>
 {
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    var cloudUrl = configuration["ElasticSearch:Url"];
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var url = configuration["ElasticSearch:Url"];
+    var username = configuration["ElasticSearch:Username"];
+    var password = configuration["ElasticSearch:Password"];
     
-    // Construction du client avec l'URL cloud fournie dans appsettings.json
-    var settings = new ElasticsearchClientSettings(new Uri(cloudUrl))
-        .DefaultIndex("medilabo")
-        .Authentication(new ApiKey(configuration["ElasticSearch:ApiKey"] ?? throw new InvalidOperationException()));
-        
+    var settings = new ElasticsearchClientSettings(new Uri(url))
+        .Authentication(new BasicAuthentication(username, password))
+        .DefaultIndex("notes");
+    
+    // Pour ignorer les certificats SSL en développement local
+    if (url.Contains("localhost"))
+    {
+        settings.ServerCertificateValidationCallback((sender, certificate, chain, errors) => true);
+    }
+    
     return new ElasticsearchClient(settings);
 });
 
