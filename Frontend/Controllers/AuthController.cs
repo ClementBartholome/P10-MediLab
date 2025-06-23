@@ -7,9 +7,18 @@ namespace P10___MédiLabo_Solutions.Controllers;
 
 [Area("Frontend")]
 [Route("[area]/[controller]")]
-public class AuthController(IHttpClientFactory httpClientFactory) : Controller
+public class AuthController : Controller
 {
-    private const string GatewayUrl = "https://localhost:7091";
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IConfiguration _configuration;
+    private readonly string _gatewayUrl;
+
+    public AuthController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    {
+        _httpClientFactory = httpClientFactory;
+        _configuration = configuration;
+        _gatewayUrl = _configuration["ApiGateway:Url"] ?? "https://localhost:7091"; 
+    }
 
     [HttpPost]
     [Route("login")]
@@ -17,7 +26,7 @@ public class AuthController(IHttpClientFactory httpClientFactory) : Controller
     {
         try
         {
-            var client = httpClientFactory.CreateClient();
+            var client = _httpClientFactory.CreateClient();
 
             var loginModel = new { username, password };
             var content = new StringContent(
@@ -25,7 +34,7 @@ public class AuthController(IHttpClientFactory httpClientFactory) : Controller
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await client.PostAsync($"{GatewayUrl}/auth/login", content);
+            var response = await client.PostAsync($"{_gatewayUrl}/auth/login", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -35,13 +44,22 @@ public class AuthController(IHttpClientFactory httpClientFactory) : Controller
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (authResult?.Token != null)
-                    Response.Cookies.Append("AuthToken", authResult.Token, new CookieOptions
+                {
+                    var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = DateTimeOffset.UtcNow.AddHours(24)
-                    });
+                        Secure = false, // HTTP en Docker
+                        SameSite = SameSiteMode.Lax, 
+                        Expires = DateTimeOffset.UtcNow.AddHours(24),
+                        Path = "/", 
+                        Domain = null
+                    };
+    
+                    Response.Cookies.Append("AuthToken", authResult.Token, cookieOptions);
+    
+                    // Debug : vérifiez que le cookie est bien ajouté
+                    Console.WriteLine($"Cookie ajouté : AuthToken = {authResult.Token}");
+                }
 
                 TempData["LoginMessage"] = "Connexion réussie !";
             }

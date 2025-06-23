@@ -1,16 +1,15 @@
 ﻿using P10___MédiLabo_Solutions.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace P10___MédiLabo_Solutions.Controllers;
 
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-public class PatientsController(IHttpClientFactory httpClientFactory) : Controller
+public class PatientsController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    : Controller
 {
-    private const string GatewayUrl = "https://localhost:7091";
+    private readonly string _gatewayUrl = configuration["ApiGateway:Url"] ?? "https://localhost:7091"; // Fallback
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -26,7 +25,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
             var patients = await GetPatients(token);
             return View(patients);
         }
-        catch
+        catch (Exception ex)
         {
             TempData["ErrorMessage"] = "Impossible de récupérer la liste des patients. Veuillez vous reconnecter.";
             Response.Cookies.Delete("AuthToken");
@@ -45,7 +44,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         }
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var response = await client.GetAsync($"{GatewayUrl}/patients/{id}");
+        var response = await client.GetAsync($"{_gatewayUrl}/patients/{id}"); // ← Utilise _gatewayUrl
         if (!response.IsSuccessStatusCode)
         {
             TempData["ErrorMessage"] = "Impossible de récupérer les informations du patient.";
@@ -70,7 +69,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var content = new StringContent(JsonSerializer.Serialize(patient), System.Text.Encoding.UTF8, "application/json");
-        var response = await client.PutAsync($"{GatewayUrl}/patients/{patient.Id}", content);
+        var response = await client.PutAsync($"{_gatewayUrl}/patients/{patient.Id}", content); // ← Utilise _gatewayUrl
         if (response.IsSuccessStatusCode)
         {
             TempData["LoginMessage"] = "Patient modifié avec succès.";
@@ -85,7 +84,8 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
-        var response = await client.GetAsync($"{GatewayUrl}/patients");
+        var response = await client.GetAsync($"{_gatewayUrl}/patients"); // ← Utilise _gatewayUrl
+        
         response.EnsureSuccessStatusCode();
         
         var content = await response.Content.ReadAsStringAsync();
@@ -99,7 +99,6 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
             return View(new PatientViewModel { DateNaissance = DateTime.Today.AddYears(-30) });
         TempData["ErrorMessage"] = "Vous devez être connecté pour créer un patient.";
         return RedirectToAction("Index");
-
     }
 
     [HttpPost]
@@ -118,7 +117,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
             var content = new StringContent(JsonSerializer.Serialize(patient), System.Text.Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{GatewayUrl}/patients", content);
+            var response = await client.PostAsync($"{_gatewayUrl}/patients", content); // ← Utilise _gatewayUrl
         
             if (response.IsSuccessStatusCode)
             {
@@ -151,7 +150,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
-            var response = await client.DeleteAsync($"{GatewayUrl}/patients/{id}");
+            var response = await client.DeleteAsync($"{_gatewayUrl}/patients/{id}"); // ← Utilise _gatewayUrl
         
             if (response.IsSuccessStatusCode)
             {
@@ -169,4 +168,3 @@ public class PatientsController(IHttpClientFactory httpClientFactory) : Controll
         return RedirectToAction("Index");
     }
 }
-

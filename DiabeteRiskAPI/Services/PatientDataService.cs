@@ -22,7 +22,6 @@ public class PatientDataService
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
         
-        // Configurer l'URL de base pour le client HTTP
         _httpClient.BaseAddress = new Uri(_configuration["ApiGateway:Url"] ?? "https://localhost:7091");
     }
 

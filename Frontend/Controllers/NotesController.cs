@@ -7,9 +7,9 @@ using DiabeteRiskAPI.Models;
 
 namespace P10___MédiLabo_Solutions.Controllers;
 
-public class NotesController(IHttpClientFactory httpClientFactory) : Controller
+public class NotesController(IHttpClientFactory httpClientFactory,  IConfiguration configuration) : Controller
 {
-    private const string GatewayUrl = "https://localhost:7091";
+    private readonly string _gatewayUrl = configuration["ApiGateway:Url"] ?? "https://localhost:7091"; 
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -31,7 +31,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // 1. Récupérer les informations du patient
-        var patientResponse = await client.GetAsync($"{GatewayUrl}/patients/{patientId}");
+        var patientResponse = await client.GetAsync($"{_gatewayUrl}/patients/{patientId}");
         if (!patientResponse.IsSuccessStatusCode)
         {
             TempData["ErrorMessage"] = "Patient introuvable.";
@@ -41,7 +41,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
         var patient = JsonSerializer.Deserialize<PatientViewModel>(patientContent, JsonOptions);
 
         // 2. Récupérer les notes du patient
-        var notesResponse = await client.GetAsync($"{GatewayUrl}/notes/patient/{patientId}");
+        var notesResponse = await client.GetAsync($"{_gatewayUrl}/notes/patient/{patientId}");
         var notes = new List<NoteViewModel>();
     
         if (notesResponse.IsSuccessStatusCode)
@@ -51,7 +51,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
         }
 
         // 3. Récupérer l'évaluation du risque de diabète
-        var riskResponse = await client.GetAsync($"{GatewayUrl}/assessment/patient/{patientId}");
+        var riskResponse = await client.GetAsync($"{_gatewayUrl}/assessment/patient/{patientId}");
         RiskAssessmentViewModel? riskAssessment = null;
         
         if (riskResponse.IsSuccessStatusCode)
@@ -104,7 +104,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync($"{GatewayUrl}/notes/{id}");
+            var response = await client.GetAsync($"{_gatewayUrl}/notes/{id}");
             if (!response.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Erreur lors de la récupération de la note.";
@@ -139,7 +139,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var content = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
-            var response = await client.PutAsync($"{GatewayUrl}/notes/{vm.Id}", content);
+            var response = await client.PutAsync($"{_gatewayUrl}/notes/{vm.Id}", content);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -149,7 +149,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             
             // Ré-indexation dans ElasticSearch
             var esContent = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
-            var esResponse = await client.PostAsync($"{GatewayUrl}/assessment/notes", esContent);
+            var esResponse = await client.PostAsync($"{_gatewayUrl}/assessment/notes", esContent);
             if (!esResponse.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Note mise à jour mais non indexée dans ElasticSearch.";
@@ -198,7 +198,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var content = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{GatewayUrl}/notes", content);
+            var response = await client.PostAsync($"{_gatewayUrl}/notes", content);
             
             if (!response.IsSuccessStatusCode)
             {
@@ -213,7 +213,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             var createdNoteContent = new StringContent(JsonSerializer.Serialize(vm), Encoding.UTF8, "application/json");
 
             // Indexation dans ElasticSearch
-            var esResponse = await client.PostAsync($"{GatewayUrl}/assessment/notes", createdNoteContent);
+            var esResponse = await client.PostAsync($"{_gatewayUrl}/assessment/notes", createdNoteContent);
             if (!esResponse.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Note créée mais non indexée dans ElasticSearch.";
@@ -246,7 +246,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.DeleteAsync($"{GatewayUrl}/notes/{id}");
+            var response = await client.DeleteAsync($"{_gatewayUrl}/notes/{id}");
             if (!response.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Erreur lors de la suppression de la note.";
@@ -254,7 +254,7 @@ public class NotesController(IHttpClientFactory httpClientFactory) : Controller
             }
             
             // Suppression de la note dans ElasticSearch
-            var esResponse = await client.DeleteAsync($"{GatewayUrl}/assessment/notes/{id}");
+            var esResponse = await client.DeleteAsync($"{_gatewayUrl}/assessment/notes/{id}");
             if (!esResponse.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Note supprimée mais non retirée d'ElasticSearch.";
