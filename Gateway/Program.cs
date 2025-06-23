@@ -4,7 +4,12 @@ using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+var ocelotFile = builder.Environment.EnvironmentName == "Docker" 
+    ? "ocelot.Docker.json" 
+    : "ocelot.json";
+
+builder.Configuration.AddJsonFile(ocelotFile, optional: false, reloadOnChange: true);
+
 builder.Services.AddOcelot();
 builder.Services.AddEndpointsApiExplorer(); 
 

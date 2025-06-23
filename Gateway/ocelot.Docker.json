@@ -1,0 +1,111 @@
+﻿{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/patients/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "patients-api",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/patients/{everything}",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
+      ],
+      "SwaggerKey": "patients"
+    },
+    {
+      "DownstreamPathTemplate": "/api/notes/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "notes-api",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/notes/{everything}",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
+      ],
+      "SwaggerKey": "notes"
+    },
+    {
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "patients-api",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/auth/{everything}",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
+      ],
+      "SwaggerKey": "patients"
+    },
+    {
+      "DownstreamPathTemplate": "/api/assessment/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "diabete-risk-api",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/assessment/{everything}",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
+      ],
+      "SwaggerKey": "risk"
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "patients",
+      "Config": [
+        {
+          "Name": "Patients API",
+          "Version": "v1",
+          "Url": "http://patients-api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "notes",
+      "Config": [
+        {
+          "Name": "Notes API",
+          "Version": "v1",
+          "Url": "http://notes-api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "risk",
+      "Config": [
+        {
+          "Name": "Risk Assessment API",
+          "Version": "v1",
+          "Url": "http://diabete-risk-api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://gateway:8080"
+  }
+}
