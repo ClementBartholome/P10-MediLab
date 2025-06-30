@@ -1,37 +1,125 @@
-﻿services:
-  p10 - médilabo solutionsp10-mdilabosolutions:
-    image: p10 - médilabo solutionsp10-mdilabosolutions
-    build:
-      context: .
-      dockerfile: P10 - MédiLabo Solutions/Dockerfile
+﻿version: '3.8'
 
-  p10 - médilabo - patients apip10-mdilabo-patientsapi:
-    image: p10 - médilabo - patients apip10-mdilabo-patientsapi
-    build:
-      context: .
-      dockerfile: P10 - MédiLabo - Patients API/Dockerfile
-
-  p10 - médilabo - notes apip10-mdilabo-notesapi:
-    image: p10 - médilabo - notes apip10-mdilabo-notesapi
-    build:
-      context: .
-      dockerfile: P10 - MédiLabo - Notes API/Dockerfile
-
-  webapplication1:
-    image: webapplication1
-    build:
-      context: .
-      dockerfile: WebApplication1/Dockerfile
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+    container_name: medilabo-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=Cl4LxKF7DcRSTpJvPuN_
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - medilabo-network
 
   gateway:
-    image: gateway
     build:
-      context: .
-      dockerfile: Gateway/Dockerfile
+      context: ./Gateway
+      dockerfile: Dockerfile
+    container_name: medilabo-gateway
+    ports:
+      - "7091:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTPS_PORT=
+    depends_on:
+      - elasticsearch
+    networks:
+      - medilabo-network
 
-  authapi:
-    image: authapi
+  patients-api:
     build:
-      context: .
-      dockerfile: AuthAPI/Dockerfile
+      context: ./PatientsAPI
+      dockerfile: Dockerfile
+    container_name: medilabo-patients
+    ports:
+      - "7006:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTPS_PORT=
+      - "ConnectionStrings__DefaultConnection=Server=192.168.1.33,1433;Database=P10_Medilab;User Id=dockeruser;Password=Docker123!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
+      - ElasticSearch__Url=http://elasticsearch:9200  
+      - ElasticSearch__Username=elastic
+      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+    depends_on:
+      - elasticsearch
+    networks:
+      - medilabo-network
 
+  notes-api:
+    build:
+      context: ./NotesAPI
+      dockerfile: Dockerfile
+    container_name: medilabo-notes
+    ports:
+      - "7292:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTPS_PORT=
+      - NotesDatabase__ConnectionString=mongodb://192.168.1.33:27017
+      - NotesDatabase__DatabaseName=NotesDB
+      - NotesDatabase__NotesCollectionName=Notes
+      - ElasticSearch__Url=http://elasticsearch:9200
+      - ElasticSearch__Username=elastic
+      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+    depends_on:
+      - elasticsearch
+    networks:
+      - medilabo-network
+
+  diabete-risk-api:
+    build:
+      context: ./DiabeteRiskAPI
+      dockerfile: Dockerfile
+    container_name: medilabo-diabete-risk
+    ports:
+      - "7081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTPS_PORT=
+      - ApiGateway__Url=http://gateway:8080
+      - ElasticSearch__Url=http://elasticsearch:9200
+      - ElasticSearch__Username=elastic
+      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+    depends_on:
+      - elasticsearch
+      - gateway
+    networks:
+      - medilabo-network
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: medilabo-frontend
+    ports:
+      - "7261:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTPS_PORT=
+      - ApiGateway__Url=http://gateway:8080
+      - ElasticSearch__Url=http://elasticsearch:9200 
+      - ElasticSearch__Username=elastic
+      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+    depends_on:
+      - elasticsearch
+    networks:
+      - medilabo-network
+
+volumes:
+  elasticsearch_data:
+    driver: local
+
+networks:
+  medilabo-network:
+    driver: bridge
