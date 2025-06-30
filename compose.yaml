@@ -16,6 +16,7 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
       - medilabo-network
+    restart: always
 
   gateway:
     build:
@@ -32,6 +33,7 @@ services:
       - elasticsearch
     networks:
       - medilabo-network
+    restart: always
 
   patients-api:
     build:
@@ -52,6 +54,7 @@ services:
       - elasticsearch
     networks:
       - medilabo-network
+    restart: always
 
   notes-api:
     build:
@@ -74,6 +77,7 @@ services:
       - elasticsearch
     networks:
       - medilabo-network
+    restart: always
 
   diabete-risk-api:
     build:
@@ -95,6 +99,7 @@ services:
       - gateway
     networks:
       - medilabo-network
+    restart: always
 
   frontend:
     build:
@@ -115,6 +120,7 @@ services:
       - elasticsearch
     networks:
       - medilabo-network
+    restart: always
 
 volumes:
   elasticsearch_data:
