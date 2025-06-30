@@ -37,13 +37,15 @@ public class ElasticSearchService
 
     public async Task<bool> IndexNoteAsync(NoteDocument note)
     {
-        var response = await _client.IndexAsync(note, i => i.Index(NotesIndex));
+        var response = await _client.IndexAsync(note, i => i.Index(NotesIndex)
+            .Refresh(Refresh.WaitFor));
         return response.IsValidResponse;
     }
 
     public async Task<bool> DeleteNoteAsync(string noteId)
     {
-        var response = await _client.DeleteAsync<NoteDocument>(noteId, d => d.Index(NotesIndex));
+        var response = await _client.DeleteAsync<NoteDocument>(noteId, d => d.Index(NotesIndex)
+            .Refresh(Refresh.WaitFor));
         return response.IsValidResponse;
     }
 
@@ -63,17 +65,18 @@ public class ElasticSearchService
 
         return response.IsValidResponse ? response.Documents.ToList() : new List<NoteDocument>();
     }
-    
+
     /// <summary>
     /// Compte les occurrences de termes déclencheurs dans les notes d'un patient 
     /// <param name="patientId"></param>
     /// <param name="triggerTerms">Liste des termes à rechercher (ex: "fumeur", "anormal", etc.)</param>
     /// <returns>Dictionnaire avec le nombre de notes contenant chaque terme</returns>
     /// </summary>
-    public async Task<Dictionary<string, int>> CountTriggerTermsInPatientNotesAsync(string patientId, List<string> triggerTerms)
+    public async Task<Dictionary<string, int>> CountTriggerTermsInPatientNotesAsync(string patientId,
+        List<string> triggerTerms)
     {
         var results = new Dictionary<string, int>();
-    
+
         foreach (var term in triggerTerms)
         {
             var response = await _client.SearchAsync<NoteDocument>(s => s
@@ -88,20 +91,21 @@ public class ElasticSearchService
                             queryDescriptor => queryDescriptor.Match(m => m
                                     .Field(noteDocument => noteDocument.Note) // Champ à rechercher
                                     .Query(term) // Terme à rechercher
-                                    .Operator(Operator.And) // Tous les mots du terme recherché doivent être présents dans la note (e.g "hémoglobine a1c")
+                                    .Operator(Operator
+                                        .And) // Tous les mots du terme recherché doivent être présents dans la note (e.g "hémoglobine a1c")
                                     .Fuzziness(new Fuzziness(2)) // Tolérance aux fautes 
                                     .PrefixLength(2) // Longueur de préfixe pour la correspondance floue
-                                    // .MinimumShouldMatch("100%") // Tous les mots doivent correspondre
+                                // .MinimumShouldMatch("100%") // Tous les mots doivent correspondre
                             )
                         )
                     )
                 )
                 .Size(0)
             );
-        
+
             results[term] = response.IsValidResponse ? (int)response.Total : 0;
         }
-    
+
         return results;
     }
 
