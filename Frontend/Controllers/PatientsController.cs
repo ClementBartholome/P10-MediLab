@@ -84,7 +84,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
-        var response = await client.GetAsync($"{_gatewayUrl}/patients"); // ← Utilise _gatewayUrl
+        var response = await client.GetAsync($"{_gatewayUrl}/patients"); 
         
         response.EnsureSuccessStatusCode();
         
