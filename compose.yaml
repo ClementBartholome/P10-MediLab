@@ -17,6 +17,17 @@ services:
     networks:
       - medilabo-network
     restart: always
+    
+  mongodb:
+    image: mongo:7.0
+    container_name: medilabo-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - medilabo-network
+    restart: always  
 
   gateway:
     build:
@@ -67,7 +78,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
-      - NotesDatabase__ConnectionString=mongodb://192.168.1.33:27017
+      - NotesDatabase__ConnectionString=mongodb://mongodb:27017
       - NotesDatabase__DatabaseName=NotesDB
       - NotesDatabase__NotesCollectionName=Notes
       - ElasticSearch__Url=http://elasticsearch:9200
@@ -124,6 +135,8 @@ services:
 
 volumes:
   elasticsearch_data:
+    driver: local
+  mongodb_data:
     driver: local
 
 networks:
