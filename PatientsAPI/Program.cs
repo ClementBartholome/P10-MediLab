@@ -98,14 +98,58 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Évite de se connecter trop tôt au conteneur SQL Server
+async Task WaitForDatabase()
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    
+    const int maxRetries = 30;
+    var delay = TimeSpan.FromSeconds(2);
+    
+    for (var i = 0; i < maxRetries; i++)
+    {
+        try
+        {
+            await dbContext.Database.CanConnectAsync();
+            Console.WriteLine("Base de données connectée avec succès!");
+            break;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Tentative {i + 1}/{maxRetries} - Connexion à la base de données échouée: {ex.Message}");
+            if (i == maxRetries - 1)
+                throw;
+            await Task.Delay(delay);
+        }
+    }
+}
+
+// Attendre que la base de données soit disponible
+await WaitForDatabase();
+
+// Appliquer les migrations
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<AuthDbContext>();
+    try
+    {
+        var authDbContext = services.GetRequiredService<AuthDbContext>();
+        await authDbContext.Database.MigrateAsync();
+        
+        var patientsDbContext = services.GetRequiredService<PatientsDbContext>();
+        await patientsDbContext.Database.MigrateAsync();
+        
+        Console.WriteLine("Migrations appliquées avec succès!");
 
-    await dbContext.Database.MigrateAsync();
-
-    await IdentitySeeder.SeedAdminUser(services);
+        await IdentitySeeder.SeedAdminUser(services);
+        Console.WriteLine("Données initiales créées avec succès!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erreur lors de l'initialisation de la base de données: {ex.Message}");
+        throw;
+    }
 }
 
 app.Run();
