@@ -1,8 +1,6 @@
 # Présentation du projet
 
-MédiLab est une solution logicielle conçue pour la gestion médicale, orientée microservices et développée dans le cadre de la formation Développeur Backend .NET. L’application répond à des besoins métiers réels : gestion des patients, centralisation des notes médicales, et évaluation automatisée du risque de diabète à partir des données patients et de leurs historiques.
-
-L’objectif principal de MédiLab est de fournir une plateforme moderne, sécurisée et évolutive permettant :
+MédiLabo Solutions est une solution logicielle conçue pour la gestion médicale. L'objectif principal est de fournir une plateforme moderne, sécurisée et évolutive permettant :
 
 - Le suivi des patients et de leurs informations médicales
 - La gestion des notes de santé par les professionnels
@@ -29,3 +27,16 @@ L’architecture de MédiLab repose sur plusieurs microservices indépendants, c
 - Docker (tous les microservices sont dockerisés)
 - Authentification JWT et sécurisation des communications
 - Swagger / OpenAPI pour la documentation automatique des APIs
+
+## Recommandations Green Code 🌱
+
+Pour réduire l’empreinte environnementale du projet et optimiser la consommation de ressources, voici quelques bonnes pratiques à appliquer :
+
+- Éviter le surprovisionnement : Allouer uniquement les ressources nécessaires dans les conteneurs Docker (CPU, mémoire). Adapter les Dockerfiles et les fichiers de configuration.
+- Minification et bundling : Utiliser la minification des fichiers JS/CSS et le bundling pour réduire la taille des assets côté client (voir la documentation ASP.NET Core sur le bundling/minification).
+- Nettoyage du code : Supprimer les dépendances et packages inutilisés dans tous les microservices.
+- Limiter les logs en production : Réduire le niveau de logs pour éviter une consommation excessive de disque et de bande passante.
+- Requêtes optimisées : Privilégier les requêtes filtrées et paginées pour éviter de charger inutilement des données volumineuses en mémoire.
+- Indexation Elasticsearch : S’assurer que l’indexation n’est lancée que si nécessaire, éviter de réindexer systématiquement toutes les notes.
+- Lazy loading : Charger les composants lourds, images et scripts à la demande.
+- Images optimisées : Utiliser des images compressées et adaptées à la résolution de l’écran.
