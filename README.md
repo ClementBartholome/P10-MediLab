@@ -40,3 +40,5 @@ Pour réduire l’empreinte environnementale du projet et optimiser la consommat
 - Indexation Elasticsearch : S’assurer que l’indexation n’est lancée que si nécessaire, éviter de réindexer systématiquement toutes les notes.
 - Lazy loading : Charger les composants lourds, images et scripts à la demande.
 - Images optimisées : Utiliser des images compressées et adaptées à la résolution de l’écran.
+- Optimiser l’hébergement : choisir un hébergeur ayant une bonne performance environnementale et alimenté en énergie renouvelable, rapprocher l’hébergement des visiteurs du site grâce à un CDN (Content Delivery Network).
+- Monitoring de l'impact écologique du projet : mesurer la consommation réelle avec des outils comme Lighthouse ou Website Carbon Calculator
