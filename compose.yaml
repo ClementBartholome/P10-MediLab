@@ -1,6 +1,27 @@
 ﻿version: '3.8'
 
 services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: medilabo-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Strong!Passw0rd
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - medilabo-network
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Strong!Passw0rd -Q 'SELECT 1'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+      
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
     container_name: medilabo-elasticsearch
@@ -57,7 +78,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
-      - "ConnectionStrings__DefaultConnection=Server=192.168.1.33,1433;Database=P10_Medilab;User Id=dockeruser;Password=Docker123!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
+      - "ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=P10_Medilab;User Id=sa;Password=Strong!Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;"
       - ElasticSearch__Url=http://elasticsearch:9200  
       - ElasticSearch__Username=elastic
       - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
@@ -137,6 +158,8 @@ volumes:
   elasticsearch_data:
     driver: local
   mongodb_data:
+    driver: local
+  sqlserver_data:
     driver: local
 
 networks:
