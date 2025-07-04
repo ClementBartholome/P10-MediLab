@@ -6,7 +6,7 @@ services:
     container_name: medilabo-sqlserver
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=Strong!Passw0rd
+      - SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Express
     ports:
       - "1433:1433"
@@ -28,7 +28,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=Cl4LxKF7DcRSTpJvPuN_
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
@@ -78,10 +78,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
-      - "ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=P10_Medilab;User Id=sa;Password=Strong!Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;"
+      - "ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=P10_Medilab;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true;"
       - ElasticSearch__Url=http://elasticsearch:9200  
       - ElasticSearch__Username=elastic
-      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+      - ElasticSearch__Password=${ELASTIC_PASSWORD}
     depends_on:
       - elasticsearch
     networks:
@@ -104,7 +104,7 @@ services:
       - NotesDatabase__NotesCollectionName=Notes
       - ElasticSearch__Url=http://elasticsearch:9200
       - ElasticSearch__Username=elastic
-      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+      - ElasticSearch__Password=${ELASTIC_PASSWORD}
     depends_on:
       - elasticsearch
     networks:
@@ -125,7 +125,7 @@ services:
       - ApiGateway__Url=http://gateway:8080
       - ElasticSearch__Url=http://elasticsearch:9200
       - ElasticSearch__Username=elastic
-      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+      - ElasticSearch__Password=${ELASTIC_PASSWORD}
     depends_on:
       - elasticsearch
       - gateway
