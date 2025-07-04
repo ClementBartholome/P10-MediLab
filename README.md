@@ -9,7 +9,7 @@ MédiLabo Solutions est une solution logicielle conçue pour la gestion médical
   
 ![2025-07-04 16_11_01-- MédiLabo Solutions](https://github.com/user-attachments/assets/8d8b9f2a-d187-4ac0-a1a4-897ecdfbf4d8)
 
-## Présentation de l’architecture (microservices, technologies, etc.)
+## Présentation de l’architecture
 
 L’architecture de MédiLab repose sur plusieurs microservices indépendants, chacun dédié à une responsabilité spécifique :
 
