@@ -55,8 +55,20 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
       
-    - name: Package
-      run: dotnet publish --configuration Release --output ./publish
+    - name: Package PatientsAPI
+      run: dotnet publish ./PatientsAPI/PatientsAPI.csproj --configuration Release --output ./publish/PatientsAPI
+
+    - name: Package NotesAPI
+      run: dotnet publish ./NotesAPI/NotesAPI.csproj --configuration Release --output ./publish/NotesAPI
+
+    - name: Package Gateway
+      run: dotnet publish ./Gateway/Gateway.csproj --configuration Release --output ./publish/Gateway
+
+    - name: Package DiabeteRiskAPI
+      run: dotnet publish ./DiabeteRiskAPI/DiabeteRiskAPI.csproj --configuration Release --output ./publish/DiabeteRiskAPI
+
+    - name: Package Frontend
+      run: dotnet publish ./Frontend/Frontend.csproj --configuration Release --output ./publish/Frontend
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
