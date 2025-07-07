@@ -24,7 +24,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PatientsAPI\PatientsAPI.csproj" />
+        <ProjectReference Update="..\PatientsAPI\PatientsAPI.csproj">
+            <Private>false</Private>
+        </ProjectReference>
     </ItemGroup>
 
 </Project>
