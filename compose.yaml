@@ -1,22 +1,23 @@
-﻿version: '3.8'
+﻿# Version du format Docker Compose
+version: '3.8'
 
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: medilabo-sqlserver
     environment:
-      - ACCEPT_EULA=Y
+      - ACCEPT_EULA=Y # Accepte la licence Microsoft
       - SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Express
     ports:
-      - "1433:1433"
+      - "1433:1433" # Expose le port SQL Server
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - sqlserver_data:/var/opt/mssql # Persistance des données
     networks:
       - medilabo-network
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Strong!Passw0rd -Q 'SELECT 1'" ]
+      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Strong!Passw0rd -Q 'SELECT 1'" ] # Vérifie que SQL Server répond
       interval: 10s
       timeout: 3s
       retries: 10
@@ -26,43 +27,45 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
     container_name: medilabo-elasticsearch
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=true
+      - discovery.type=single-node # Mode single node
+      - xpack.security.enabled=true # Sécurité activée
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Limite mémoire Java
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "9200:9200" # API REST
+      - "9300:9300" # Communication interne
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
+      - elasticsearch_data:/usr/share/elasticsearch/data # Persistance des données
     networks:
       - medilabo-network
     restart: always
     
   mongodb:
+    
     image: mongo:7.0
     container_name: medilabo-mongodb
     ports:
-      - "27017:27017"
+      - "27017:27017" # Port MongoDB
     volumes:
-      - mongodb_data:/data/db
+      - mongodb_data:/data/db # Persistance des données
     networks:
       - medilabo-network
     restart: always  
 
+  # API Gateway (point d'entrée principal)
   gateway:
     build:
       context: ./Gateway
       dockerfile: Dockerfile
     container_name: medilabo-gateway
     ports:
-      - "7091:8080"
+      - "7091:8080" # Expose le port de l'API Gateway
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
     depends_on:
-      - elasticsearch
+      - elasticsearch # Démarre après ElasticSearch
     networks:
       - medilabo-network
     restart: always
@@ -99,7 +102,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
-      - NotesDatabase__ConnectionString=mongodb://mongodb:27017
+      - NotesDatabase__ConnectionString=mongodb://mongodb:27017 # Connexion MongoDB
       - NotesDatabase__DatabaseName=NotesDB
       - NotesDatabase__NotesCollectionName=Notes
       - ElasticSearch__Url=http://elasticsearch:9200
@@ -147,13 +150,14 @@ services:
       - ApiGateway__Url=http://gateway:8080
       - ElasticSearch__Url=http://elasticsearch:9200 
       - ElasticSearch__Username=elastic
-      - ElasticSearch__Password=Cl4LxKF7DcRSTpJvPuN_
+      - ElasticSearch__Password=${ELASTIC_PASSWORD}
     depends_on:
       - elasticsearch
     networks:
       - medilabo-network
     restart: always
 
+# Définition des volumes pour la persistance des données
 volumes:
   elasticsearch_data:
     driver: local
@@ -162,6 +166,7 @@ volumes:
   sqlserver_data:
     driver: local
 
+# Définition du réseau commun à tous les services
 networks:
   medilabo-network:
     driver: bridge

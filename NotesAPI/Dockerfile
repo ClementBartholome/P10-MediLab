@@ -7,7 +7,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["P10 - MédiLabo - Notes API/P10 - MédiLabo - Notes API.csproj", "P10 - MédiLabo - Notes API/"]
+COPY ["P10 - MédiLabo - Notes API.csproj", "./"]
 RUN dotnet restore "P10 - MédiLabo - Notes API/P10 - MédiLabo - Notes API.csproj"
 COPY . .
 WORKDIR "/src/P10 - MédiLabo - Notes API"
