@@ -86,5 +86,5 @@ Pour réduire l’empreinte environnementale du projet et optimiser la consommat
 2. **Implémenter la pagination** sur toutes les APIs
 3. **Configurer un CDN écologique** (Cloudflare) pour les assets statiques
 4. **Activer la compression** Gzip/Brotli sur toutes les réponses
-5. **Mettre en place le monitoring** de consommation avec Application Insights
+5. **Mettre en place le monitoring** de consommation des ressources avec un outil comme Application Insights
 6. **Optimiser les index** SQL Server, MongoDB et Elasticsearch selon l'usage réel
