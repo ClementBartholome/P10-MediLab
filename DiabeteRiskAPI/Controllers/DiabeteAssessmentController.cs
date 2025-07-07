@@ -66,4 +66,23 @@ public class DiabetesAssessmentController(
             return StatusCode(500, "Erreur lors de la suppression de la note");
         }
     }
+
+    [HttpDelete("notes/patient/{patientId}")]
+    public async Task<IActionResult> DeleteAllNotesByPatientId(string patientId)
+    {
+        try
+        {
+            var result = await elasticSearchService.DeleteAllNotesByPatientIdAsync(patientId);
+            if (result)
+            {
+                return Ok();
+            }
+            return NotFound($"Aucune note trouvée pour le patient avec l'ID {patientId}");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Erreur lors de la suppression des notes pour le patient {PatientId}", patientId);
+            return StatusCode(500, "Erreur lors de la suppression des notes");
+        }
+    }
 }

@@ -48,6 +48,22 @@ public class ElasticSearchService
             .Refresh(Refresh.WaitFor));
         return response.IsValidResponse;
     }
+    
+    public async Task<bool> DeleteAllNotesByPatientIdAsync(string patientId)
+    {
+        var response = await _client.DeleteByQueryAsync<NoteDocument>(d => d
+            .Indices(NotesIndex)
+            .Query(q => q
+                .Term(t => t
+                    .Field(f => f.PatientId)
+                    .Value(patientId)
+                )
+            )
+            .Refresh()
+        );
+
+        return response.IsValidResponse;
+    }
 
     private async Task<List<NoteDocument>> GetPatientNotesAsync(string patientId)
     {

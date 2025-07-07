@@ -44,7 +44,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
         }
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var response = await client.GetAsync($"{_gatewayUrl}/patients/{id}"); // ← Utilise _gatewayUrl
+        var response = await client.GetAsync($"{_gatewayUrl}/patients/{id}"); 
         if (!response.IsSuccessStatusCode)
         {
             TempData["ErrorMessage"] = "Impossible de récupérer les informations du patient.";
@@ -69,7 +69,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var content = new StringContent(JsonSerializer.Serialize(patient), System.Text.Encoding.UTF8, "application/json");
-        var response = await client.PutAsync($"{_gatewayUrl}/patients/{patient.Id}", content); // ← Utilise _gatewayUrl
+        var response = await client.PutAsync($"{_gatewayUrl}/patients/{patient.Id}", content);
         if (response.IsSuccessStatusCode)
         {
             TempData["LoginMessage"] = "Patient modifié avec succès.";
@@ -117,7 +117,7 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
             var content = new StringContent(JsonSerializer.Serialize(patient), System.Text.Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{_gatewayUrl}/patients", content); // ← Utilise _gatewayUrl
+            var response = await client.PostAsync($"{_gatewayUrl}/patients", content); 
         
             if (response.IsSuccessStatusCode)
             {
@@ -150,15 +150,23 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
-            var response = await client.DeleteAsync($"{_gatewayUrl}/patients/{id}"); // ← Utilise _gatewayUrl
+            var response = await client.DeleteAsync($"{_gatewayUrl}/patients/{id}");
         
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                TempData["SuccessMessage"] = "Patient supprimé avec succès.";
+                TempData["ErrorMessage"] = "Erreur lors de la suppression du patient.";
                 return RedirectToAction("Index");
             }
-        
-            TempData["ErrorMessage"] = "Erreur lors de la suppression du patient.";
+            
+            // Supprimer les notes associées au patient dans ElasticSearch
+            var notesResponse = await client.DeleteAsync($"{_gatewayUrl}/assessment/notes/patient/{id}");
+            if (!notesResponse.IsSuccessStatusCode)
+            {
+                TempData["ErrorMessage"] = "Erreur lors de la suppression des notes associées au patient.";
+                return RedirectToAction("Index");
+            }
+            
+            TempData["LoginMessage"] = "Patient supprimé avec succès.";
         }
         catch
         {
