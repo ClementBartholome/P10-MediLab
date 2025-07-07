@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using DiabeteRiskAPI.Models;
+using System.Net;
 
 namespace P10___MédiLabo_Solutions.Controllers;
 
@@ -106,7 +107,8 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync($"{_gatewayUrl}/notes/{id}");
+            var encodedId = Uri.EscapeDataString(id);
+            var response = await client.GetAsync($"{_gatewayUrl}/notes/{encodedId}");
             if (!response.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Erreur lors de la récupération de la note.";
@@ -135,6 +137,11 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             return RedirectToAction("Index", "Patients");
         }
 
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+
         try
         {
             var client = httpClientFactory.CreateClient();
@@ -145,7 +152,18 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
 
             if (!response.IsSuccessStatusCode)
             {
-                TempData["ErrorMessage"] = "Erreur lors de la mise à jour de la note.";
+                if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    TempData["ErrorMessage"] = "Les données fournies ne sont pas valides.";
+                }
+                else if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    TempData["ErrorMessage"] = "La note à modifier est introuvable.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Erreur lors de la mise à jour de la note.";
+                }
                 return View(vm);
             }
 
@@ -161,9 +179,10 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             TempData["SuccessMessage"] = "Note mise à jour avec succès.";
             return RedirectToAction("Index", new { patientId = vm.PatientId });
         }
-        catch
+        catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "Erreur lors de la mise à jour de la note.";
+            Console.WriteLine($"Exception lors de la mise à jour: {ex.Message}");
+            TempData["ErrorMessage"] = "Erreur technique lors de la mise à jour de la note.";
             return View(vm);
         }
     }
@@ -191,6 +210,11 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             return RedirectToAction("Index", "Patients");
         }
 
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+        
         try
         {
             vm.Date = DateTime.Now;
@@ -204,8 +228,18 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
 
             if (!response.IsSuccessStatusCode)
             {
-                TempData["ErrorMessage"] = "Erreur lors de l'enregistrement de la note.";
-                return RedirectToAction("Index", "Patients");
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        TempData["ErrorMessage"] = "Les données fournies ne sont pas valides.";
+                        return View(vm);
+                    case HttpStatusCode.NotFound:
+                        TempData["ErrorMessage"] = "Le patient spécifié est introuvable.";
+                        return RedirectToAction("Index", "Patients");
+                    default:
+                        TempData["ErrorMessage"] = "Erreur lors de l'enregistrement de la note.";
+                        return View(vm);
+                }
             }
 
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -225,9 +259,10 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             TempData["SuccessMessage"] = "Note créée avec succès.";
             return RedirectToAction("Index", new { patientId = vm.PatientId });
         }
-        catch
+        catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "Erreur lors de la création de la note.";
+            Console.WriteLine($"Exception lors de la création: {ex.Message}");
+            TempData["ErrorMessage"] = "Erreur technique lors de la création de la note.";
             return View(vm);
         }
     }
@@ -242,6 +277,18 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             return RedirectToAction("Index", "Patients");
         }
 
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            TempData["ErrorMessage"] = "L'identifiant de la note est invalide.";
+            return RedirectToAction("Index", new { patientId });
+        }
+
+        if (patientId <= 0)
+        {
+            TempData["ErrorMessage"] = "L'identifiant du patient est invalide.";
+            return RedirectToAction("Index", "Patients");
+        }
+
         try
         {
             var client = httpClientFactory.CreateClient();
@@ -250,7 +297,14 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             var response = await client.DeleteAsync($"{_gatewayUrl}/notes/{id}");
             if (!response.IsSuccessStatusCode)
             {
-                TempData["ErrorMessage"] = "Erreur lors de la suppression de la note.";
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    TempData["ErrorMessage"] = "La note à supprimer est introuvable.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Erreur lors de la suppression de la note.";
+                }
                 return RedirectToAction("Index", new { patientId });
             }
 
@@ -259,16 +313,16 @@ public class NotesController(IHttpClientFactory httpClientFactory, IConfiguratio
             if (!esResponse.IsSuccessStatusCode)
             {
                 TempData["ErrorMessage"] = "Note supprimée mais non retirée d'ElasticSearch.";
-
                 return RedirectToAction("Index", new { patientId });
             }
 
             TempData["SuccessMessage"] = "Note supprimée avec succès.";
             return RedirectToAction("Index", new { patientId });
         }
-        catch
+        catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "Erreur lors de la suppression de la note.";
+            Console.WriteLine($"Exception lors de la suppression: {ex.Message}");
+            TempData["ErrorMessage"] = "Erreur technique lors de la suppression de la note.";
             return RedirectToAction("Index", new { patientId });
         }
     }

@@ -20,14 +20,17 @@
                         <div class="mb-3">
                             <label asp-for="Prenom" class="form-label">Prénom</label>
                             <input asp-for="Prenom" class="form-control" required />
+                            <span asp-validation-for="Prenom" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label asp-for="Nom" class="form-label">Nom</label>
                             <input asp-for="Nom" class="form-control" required />
+                            <span asp-validation-for="Nom" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label asp-for="DateNaissance" class="form-label">Date de naissance</label>
                             <input asp-for="DateNaissance" class="form-control" type="date" required />
+                            <span asp-validation-for="DateNaissance" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label asp-for="Genre" class="form-label">Genre</label>
@@ -37,6 +40,7 @@
                                     <option value="@((int)genre)">@genre.GetDisplayName()</option>
                                 }
                             </select>
+                            <span asp-validation-for="Genre" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label asp-for="Adresse" class="form-label">Adresse</label>

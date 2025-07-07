@@ -66,6 +66,13 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
             TempData["ErrorMessage"] = "Vous devez être connecté pour éditer un patient.";
             return RedirectToAction("Index");
         }
+        
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Veuillez corriger les erreurs dans le formulaire.";
+            return View(patient);
+        }
+        
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var content = new StringContent(JsonSerializer.Serialize(patient), System.Text.Encoding.UTF8, "application/json");
@@ -109,6 +116,12 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
         {
             TempData["ErrorMessage"] = "Vous devez être connecté pour créer un patient.";
             return RedirectToAction("Index");
+        }
+        
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Veuillez corriger les erreurs dans le formulaire.";
+            return View(patient);
         }
 
         try 
