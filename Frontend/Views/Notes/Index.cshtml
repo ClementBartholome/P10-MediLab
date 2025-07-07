@@ -28,8 +28,11 @@
                 <div class="card-body">
                     <div class="text-center mb-4">
                         <div class="avatar-circle mb-3">
-                            <span class="initials">@(Model.Patient.Prenom[0])@(Model.Patient.Nom[0])</span>
-                        </div>
+                            <img src="https://randomuser.me/api/portraits/men/@(Model.Patient.Id % 100).jpg"
+                                 alt="Avatar"
+                                 class="rounded-circle shadow"
+                                 width="96" height="96" />
+                            </div>
                         <h3>@Model.Patient.Prenom @Model.Patient.Nom</h3>
                     </div>
 
@@ -124,7 +127,7 @@
                             <div class="timeline-date">
                                         <span class="badge bg-secondary">
                                             <i class="fa-regular fa-calendar me-1"></i>
-                                            @note.Date.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                            @TimeZoneInfo.ConvertTimeFromUtc(note.Date, TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time")).ToString("dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.GetCultureInfo("fr-FR"))
                                         </span>
                             </div>
                             <div class="timeline-content">

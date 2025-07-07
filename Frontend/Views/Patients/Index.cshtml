@@ -31,7 +31,10 @@
                         <div class="card h-100 shadow-sm">
                             <div class="card-body text-center">
                                 <div class="mb-3">
-                                    <i class="fa-solid fa-circle-user fa-4x text-primary"></i>
+                                    <img src="https://randomuser.me/api/portraits/men/@(patient.Id % 100).jpg"
+                                         alt="Avatar"
+                                         class="rounded-circle shadow"
+                                         width="96" height="96" />
                                 </div>
                                 <h5 class="card-title">@patient.Prenom @patient.Nom</h5>
                                 <div class="mt-4 d-grid gap-2">
