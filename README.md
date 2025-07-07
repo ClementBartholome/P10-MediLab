@@ -49,7 +49,7 @@ Pour réduire l’empreinte environnementale du projet et optimiser la consommat
 #### Bases de données efficaces
 - **Requêtes optimisées** : Privilégier les requêtes filtrées et paginées
 - **Indexation intelligente** : Éviter la réindexation systématique (Elasticsearch)
-- *Exemples : Entity Framework AsNoTracking(), pagination avec Skip/Take*
+- *Exemples : Entity Framework AsNoTracking() pour les requêtes de lecture, pagination avec Skip/Take*
 
 #### Cache et stockage
 - **Cache distribué** : Éviter les requêtes répétitives
