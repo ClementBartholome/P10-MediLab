@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.0.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
         <PackageReference Include="NEST" Version="7.17.5" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.2" />
@@ -20,8 +21,5 @@
       </Content>
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\PatientsAPI\PatientsAPI.csproj" />
-    </ItemGroup>
 
 </Project>
