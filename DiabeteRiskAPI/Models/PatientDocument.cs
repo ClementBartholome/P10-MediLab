@@ -1,4 +1,4 @@
-﻿using P10___MédiLabo___Patients_API.Enums;
+﻿using DiabeteRiskAPI.Enums;
 
 namespace DiabeteRiskAPI.Models;
 

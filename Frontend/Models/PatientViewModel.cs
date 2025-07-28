@@ -17,4 +17,5 @@ public class PatientViewModel
     public int Genre { get; set; }
     public string? Adresse { get; set; }
     public string? Telephone { get; set; }
+    public RiskAssessmentViewModel? RiskAssessment { get; set; }
 }

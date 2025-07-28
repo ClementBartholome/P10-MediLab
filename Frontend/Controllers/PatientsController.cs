@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using DiabeteRiskAPI.Models;
 
 namespace P10___MédiLabo_Solutions.Controllers;
 
@@ -23,6 +24,34 @@ public class PatientsController(IHttpClientFactory httpClientFactory, IConfigura
         try
         {
             var patients = await GetPatients(token);
+
+            foreach (var patient in patients)
+            {
+                var client = httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var riskResponse = await client.GetAsync($"{_gatewayUrl}/assessment/patient/{patient.Id}");
+
+                if (riskResponse.IsSuccessStatusCode)
+                {
+                    var riskContent = await riskResponse.Content.ReadAsStringAsync();
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        Converters = { new RiskLevelConverter() }
+                    };
+
+                    var riskAssessment = JsonSerializer.Deserialize<RiskAssessmentViewModel>(riskContent, options);
+                    patient.RiskAssessment = riskAssessment;
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"Erreur lors de la récupération de l'évaluation du risque: {riskResponse.StatusCode}");
+                }
+            }
+            
             return View(patients);
         }
         catch (Exception ex)
