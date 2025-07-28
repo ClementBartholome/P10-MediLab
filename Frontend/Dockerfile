@@ -7,17 +7,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["P10 - MédiLabo Solutions/P10 - MédiLabo Solutions.csproj", "P10 - MédiLabo Solutions/"]
-RUN dotnet restore "P10 - MédiLabo Solutions/P10 - MédiLabo Solutions.csproj"
+COPY ["Frontend.csproj", "."]
+RUN dotnet restore "Frontend.csproj"
 COPY . .
-WORKDIR "/src/P10 - MédiLabo Solutions"
-RUN dotnet build "./P10 - MédiLabo Solutions.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src"
+RUN dotnet build "Frontend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./P10 - MédiLabo Solutions.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+WORKDIR "/src"
+RUN dotnet publish "Frontend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "P10 - MédiLabo Solutions.dll"]
+ENTRYPOINT ["dotnet", "Frontend.dll"]

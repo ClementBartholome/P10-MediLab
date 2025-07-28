@@ -12,18 +12,18 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 # Copie le fichier projet pour restaurer les dépendances
-COPY ["Gateway/Gateway.csproj", "Gateway/"]
-RUN dotnet restore "Gateway/Gateway.csproj"
+COPY ["Gateway.csproj", "."]
+RUN dotnet restore "Gateway.csproj"
 # Copie le reste du code source
 COPY . .
-WORKDIR "/src/Gateway"
+WORKDIR "/src"
 # Compile le projet
-RUN dotnet build "./Gateway.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "Gateway.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Étape 3 : Build de l'application
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Gateway.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Gateway.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Étape 4 : Image finale pour exécuter l'app
 FROM base AS final
