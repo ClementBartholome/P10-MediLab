@@ -4,10 +4,54 @@ MédiLabo Solutions est une solution logicielle conçue pour la gestion médical
 
 - Le suivi des patients et de leurs informations médicales
 - La gestion des notes de santé par les professionnels
-- L’évaluation automatique du risque de diabète, basée sur l’analyse de notes et de critères médicaux
+- L’évaluation automatique du risque de diabète, basée sur l’analyse de termes déclencheurs contenus dans les notes
 - Une séparation claire des responsabilités grâce à une architecture microservices
   
 ![2025-07-04 16_11_01-- MédiLabo Solutions](https://github.com/user-attachments/assets/8d8b9f2a-d187-4ac0-a1a4-897ecdfbf4d8)
+
+## Installation et démarrage du projet
+
+### Prérequis
+
+Avant de lancer le projet, assurez-vous d'avoir installé :
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — disponible sur Windows, macOS et Linux
+- Git pour cloner le repository
+
+---
+
+### Étapes
+
+1. **Cloner le projet**
+
+```bash
+git clone https://github.com/ClementBartholome/P10-MediLab
+cd medilabo-solutions
+```
+
+2. **Configuration des variables d'environnement**
+
+Créez un fichier .env à la racine du projet avec les variables suivantes :
+
+```bash
+# Mot de passe pour SQL Server (minimum 8 caractères avec majuscule, minuscule, chiffre et caractère spécial)
+SA_PASSWORD=Strong!Passw0rd
+
+# Mot de passe pour Elasticsearch
+ELASTIC_PASSWORD=elastic123!
+```
+
+3. Lancement du projet
+
+```bash
+# Construire et démarrer tous les services
+docker-compose up --build
+```
+
+Le projet est ensuite accessible localement à l’adresse :
+http://localhost:7261
+
+
 
 ## Présentation de l’architecture
 
