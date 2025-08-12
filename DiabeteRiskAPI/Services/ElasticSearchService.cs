@@ -86,8 +86,8 @@ public class ElasticSearchService
     /// Compte les occurrences de termes déclencheurs dans les notes d'un patient 
     /// <param name="patientId"></param>
     /// <param name="triggerTerms">Liste des termes à rechercher (ex: "fumeur", "anormal", etc.)</param>
-    /// <returns>Dictionnaire avec le nombre de notes contenant chaque terme</returns>
-    /// </summary>
+    /// <returns>Dictionnaire où chaque clé est un terme déclencheur et chaque valeur est le nombre de notes du patient contenant ce terme.</returns>
+    /// /// </summary>
     public async Task<Dictionary<string, int>> CountTriggerTermsInPatientNotesAsync(string patientId,
         List<string> triggerTerms)
     {
