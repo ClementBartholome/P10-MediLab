@@ -6,13 +6,13 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: medilabo-sqlserver
     environment:
-      - ACCEPT_EULA=Y # Accepte la licence Microsoft
+      - ACCEPT_EULA=Y # Accepte la licence Microsoft, obligatoire pour démarrer SQL Server
       - SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Express
     ports:
-      - "1433:1433" # Expose le port SQL Server
+      - "1433:1433" 
     volumes:
-      - sqlserver_data:/var/opt/mssql # Persistance des données
+      - sqlserver_data:/var/opt/mssql 
     networks:
       - medilabo-network
     restart: always
@@ -35,17 +35,16 @@ services:
       - "9200:9200" # API REST
       - "9300:9300" # Communication interne
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data # Persistance des données
+      - elasticsearch_data:/usr/share/elasticsearch/data 
     networks:
       - medilabo-network
     restart: always
     
   mongodb:
-    
     image: mongo:7.0
     container_name: medilabo-mongodb
     ports:
-      - "27017:27017" # Port MongoDB
+      - "27017:27017"
     volumes:
       - mongodb_data:/data/db # Persistance des données
     networks:
@@ -59,13 +58,13 @@ services:
       dockerfile: Dockerfile
     container_name: medilabo-gateway
     ports:
-      - "7091:8080" # Expose le port de l'API Gateway
+      - "7091:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
     depends_on:
-      - elasticsearch # Démarre après ElasticSearch
+      - elasticsearch
     networks:
       - medilabo-network
     restart: always
@@ -87,6 +86,7 @@ services:
       - ElasticSearch__Password=${ELASTIC_PASSWORD}
     depends_on:
       - elasticsearch
+      - sqlserver
     networks:
       - medilabo-network
     restart: always
@@ -102,7 +102,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
-      - NotesDatabase__ConnectionString=mongodb://mongodb:27017 # Connexion MongoDB
+      - NotesDatabase__ConnectionString=mongodb://mongodb:27017
       - NotesDatabase__DatabaseName=NotesDB
       - NotesDatabase__NotesCollectionName=Notes
       - ElasticSearch__Url=http://elasticsearch:9200
@@ -110,6 +110,7 @@ services:
       - ElasticSearch__Password=${ELASTIC_PASSWORD}
     depends_on:
       - elasticsearch
+      - mongodb
     networks:
       - medilabo-network
     restart: always
@@ -122,10 +123,9 @@ services:
     ports:
       - "7081:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
-      - ApiGateway__Url=http://gateway:8080
       - ElasticSearch__Url=http://elasticsearch:9200
       - ElasticSearch__Username=elastic
       - ElasticSearch__Password=${ELASTIC_PASSWORD}
@@ -144,15 +144,14 @@ services:
     ports:
       - "7261:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTPS_PORT=
-      - ApiGateway__Url=http://gateway:8080
       - ElasticSearch__Url=http://elasticsearch:9200 
       - ElasticSearch__Username=elastic
       - ElasticSearch__Password=${ELASTIC_PASSWORD}
     depends_on:
-      - elasticsearch
+      - gateway
     networks:
       - medilabo-network
     restart: always
