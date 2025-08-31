@@ -26,7 +26,7 @@ Avant de lancer le projet, assurez-vous d'avoir installé :
 
 ```bash
 git clone https://github.com/ClementBartholome/P10-MediLab
-cd medilabo-solutions
+cd "P10 - MédiLabo Solutions"
 ```
 
 2. **Configuration des variables d'environnement**
