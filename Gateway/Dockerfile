@@ -1,6 +1,5 @@
 ﻿# Étape 1 : Image de base pour exécuter l'application ASP.NET
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-# Utilisateur non-root (doit être défini dans l'environnement d'exécution)
 USER $APP_UID
 WORKDIR /app
 # Expose les ports utilisés par l'application

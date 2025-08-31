@@ -57,7 +57,6 @@ public class AuthController : Controller
     
                     Response.Cookies.Append("AuthToken", authResult.Token, cookieOptions);
     
-                    // Debug : vérifiez que le cookie est bien ajouté
                     Console.WriteLine($"Cookie ajouté : AuthToken = {authResult.Token}");
                 }
 
